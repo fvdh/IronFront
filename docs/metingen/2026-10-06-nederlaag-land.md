@@ -1,0 +1,189 @@
+# Meting nederlaag-land (2026-10-06)
+
+Build 1.3.0+49aad606-dirty · AI-versie 2 · 81 potjes · maps=plains,rivers,highlands · seeds=3 vanaf 1000 · size=small · diff=hard,hard · superwapens=aan · ore=v12 (standaard) · stad=aan
+
+Alle spelers in deze run zijn AI. B-metrieken (keuzedichtheid) zijn voor de AI **diagnose**: de AI denkt elke 30–60 ticks en houdt bewust een geldreserve aan (`planUnits`), wat als keuze-idle telt. Cijfers: mediaan (Q1–Q3). Er staan bewust geen grenzen in dit rapport; die komen in `docs/metingen/grenzen.md` (§2 regel 6).
+
+Kanttekening: de AI breidt niet uit naar andere velden (alleen een Base Crawler zonder CY, `crawlers()` in `ai.ts`); uitbreidingscijfers meten dat gedrag.
+
+## Alarmbellen
+
+| Signaal | Waarde |
+| --- | --- |
+| Superwapen: bak `gelijk` → tegenstander binnen 90 s uit | 0/1 (0%) — **onbeslist** (n < 15) |
+| Overwinst superwapen, bak ahead | – |
+| Overwinst superwapen, bak even | +50 procentpunt (n=1, onbeslist) |
+| Overwinst superwapen, bak behind | – |
+| Keuze-idle midgame (unit-wachtrijen) | 9% (4%–15%), n=72 |
+| Tijd zonder beslissing ≥ 30 s (aandeel speeltijd) | 32% (26%–43%), n=162 |
+| Dominante eenheid (gemiddeld aandeel) | 69% (62%–78%), n=162 |
+| Legerconcentratie lategame | 0.73 (0.73–0.73), n=1 |
+| Comeback (winnaar stond ooit ≥ 40% achter) | 13/81 (16%) |
+| Patstellingen (30 min zonder winnaar) | 0/81 (0%) |
+| Tijd tot eerste strategische keuze (min) | 3.13 (2.66–3.52), n=162 |
+
+## A. Verloop
+
+| Metriek | Waarde |
+| --- | --- |
+| Duur (min) | 7.73 (6.63–9.70), n=81 |
+| Eerste contact (min) | 5.12 (5.00–5.33), n=81 |
+| TTK eerste gevecht (s) | 135.0 (118.6–154.2), n=81 |
+| Grootste gevecht (% legerwaarde van één kant) | 100% (100%–100%), n=81 |
+| Voorsprong op 5 min (leger · inkomen, wie voor staat : de ander) | 1.18 (1.09–1.29), n=73 · 1.07 (1.03–1.18), n=81 |
+| Voorsprong op 10 min (leger · inkomen, wie voor staat : de ander) | 1.48 (1.47–4.53), n=3 · 1.32 (1.09–4.02), n=7 |
+| Voorsprong op 15 min (leger · inkomen, wie voor staat : de ander) | 6.00 (6.00–6.00), n=1 · 1.50 (1.44–1.56), n=2 |
+| Voorsprong op 20 min (leger · inkomen, wie voor staat : de ander) | – · – |
+
+## B. Keuzedichtheid (AI: diagnose)
+
+| Metriek | Alle | allies | soviets | psi |
+| --- | --- | --- | --- | --- |
+| Keuze-idle (hoofdmetriek) | 10% (8%–12%), n=162 | 11% (9%–13%), n=54 | 10% (8%–12%), n=54 | 10% (7%–11%), n=54 |
+| Keuze-idle opening | 11% (8%–13%), n=162 | 12% (9%–14%), n=54 | 12% (10%–14%), n=54 | 9% (7%–11%), n=54 |
+| Keuze-idle contact | 12% (9%–15%), n=162 | 15% (11%–19%), n=54 | 10% (9%–15%), n=54 | 11% (9%–14%), n=54 |
+| Keuze-idle midgame | 9% (4%–15%), n=72 | 10% (8%–35%), n=20 | 7% (4%–13%), n=29 | 8% (4%–12%), n=23 |
+| Keuze-idle lategame | 5% (4%–6%), n=2 | 7% (7%–7%), n=1 | – | 3% (3%–3%), n=1 |
+| Keuze-idle end | 10% (5%–14%), n=162 | 13% (6%–17%), n=54 | 8% (4%–13%), n=54 | 10% (4%–13%), n=54 |
+| Keuze-idle bouwwachtrij (detail) | 9% (6%–15%), n=162 | 16% (9%–18%), n=54 | 9% (7%–12%), n=54 | 7% (5%–9%), n=54 |
+| Geldgebrek | 35% (30%–41%), n=162 | 32% (27%–38%), n=54 | 34% (30%–39%), n=54 | 37% (35%–43%), n=54 |
+| Arm-idle | 28% (24%–32%), n=162 | 26% (23%–30%), n=54 | 30% (26%–34%), n=54 | 29% (24%–33%), n=54 |
+| Productie-uptime | 43% (35%–50%), n=162 | 47% (39%–56%), n=54 | 43% (34%–50%), n=54 | 39% (34%–45%), n=54 |
+| Ongebruikt geld (gem. credits bij keuze-idle) | 319 (263–375), n=162 | 324 (254–381), n=54 | 331 (270–374), n=54 | 304 (237–372), n=54 |
+| Productieopties gebouw · inf · voertuig | 13 (10–13), n=162 · 5 (4–6), n=162 · 5 (3–7), n=162 | 13 (9–13), n=54 · 6 (4–6), n=54 · 4 (3–4), n=54 | 13 (9–13), n=54 · 6 (4–8), n=54 · 8 (5–9), n=54 | 13 (10–13), n=54 · 5 (3–5), n=54 · 5 (3–5), n=54 |
+| Gebruikte breedte (defs in 2 min) | 6.0 (5.0–7.0), n=162 | 6.0 (6.0–7.0), n=54 | 6.0 (5.0–7.0), n=54 | 6.0 (5.0–6.5), n=54 |
+| Langste gat zonder beslissing (s) | 79 (75–93), n=162 | 77 (74–90), n=54 | 76 (73–90), n=54 | 87 (78–99), n=54 |
+| Mediaan gat (s) | 4.0 (3.0–4.4), n=162 | 3.5 (2.5–4.0), n=54 | 4.0 (3.0–4.0), n=54 | 4.0 (3.0–4.5), n=54 |
+| Dominante eenheid, % tijd boven 50% | 82% (66%–95%), n=162 | 82% (64%–90%), n=54 | 94% (75%–100%), n=54 | 73% (60%–89%), n=54 |
+| Planwissels per potje | 6.0 (6.0–7.0), n=162 | 6.0 (5.0–7.0), n=54 | 6.0 (6.0–8.0), n=54 | 6.0 (6.0–7.0), n=54 |
+
+## C. Tijd tot de eerste betekenisvolle beslissing (min; n = potjes waarin het voorkwam)
+
+| Moment | Alle | allies | soviets | psi |
+| --- | --- | --- | --- | --- |
+| expansion | 2.45 (2.43–2.51), n=19 | 2.44 (2.43–2.45), n=6 | 2.44 (2.42–2.45), n=6 | 2.53 (2.51–2.68), n=7 |
+| tech | 3.53 (3.28–3.95), n=162 | 3.58 (3.24–3.94), n=54 | 3.46 (3.22–3.87), n=54 | 3.52 (3.36–4.05), n=54 |
+| ecoAttack | 5.24 (4.93–5.64), n=139 | 5.19 (5.11–5.44), n=51 | 5.26 (4.84–5.70), n=46 | 5.35 (4.86–6.15), n=42 |
+| defense | 5.82 (5.30–6.17), n=71 | 5.67 (5.31–6.37), n=20 | 5.48 (5.13–5.95), n=26 | 5.95 (5.77–6.27), n=25 |
+| counter | 2.97 (2.68–3.77), n=115 | 2.95 (2.56–4.67), n=31 | 2.80 (2.67–3.80), n=45 | 3.22 (2.77–3.48), n=39 |
+| factionMechanic | 5.55 (5.28–6.38), n=27 | 5.51 (4.74–5.99), n=7 | 5.58 (5.21–6.67), n=11 | 5.55 (5.40–6.65), n=9 |
+| strategic | 3.13 (2.66–3.52), n=162 | 3.21 (2.55–3.64), n=54 | 2.83 (2.58–3.45), n=54 | 3.24 (2.73–3.48), n=54 |
+| Reactietijd verdediging (s) | 27 (15–41), n=71 | 23 (12–41), n=20 | 23 (10–36), n=26 | 33 (27–41), n=25 |
+
+## D. Superwapens
+
+Eerste schot per potje: 1 van 81 potjes. Bakken op totale waarde (leger + gebouwen + credits); de indeling op legerwaarde ernaast. Een bak met n < 15 is onbeslist.
+
+| Bak | n (leger-bak n) | Tegenstander uit < 90 s | Beslissend achter < 90 s | Winst schutter | Verlies tegenstander 90 s (mediaan $) | Waarvan superwapen |
+| --- | --- | --- | --- | --- | --- | --- |
+| ahead | 0 (1) onbeslist | – | – | – | – | 0% |
+| even | 1 (0) onbeslist | 0/1 (0%) | 1/1 (100%) | 1/1 (100%) | 19800 | 0% |
+| behind | 0 (0) onbeslist | – | – | – | – | 0% |
+
+## E. Sneeuwbal, comeback, deathball
+
+| Metriek | Waarde |
+| --- | --- |
+| P(winst) bij legerwaarde ≥ 1,5× op 10 min | 14/14 (100%) |
+| Comeback | 13/81 (16%) |
+| Beslissend gevecht (≥ 50% van het leger, einde < 5 min) | 74/81 (91%) |
+| ...waarvan na 15 min | 2/81 (2%) |
+| Legerconcentratie opening | 1.00 (0.91–1.00), n=162 |
+| Legerconcentratie contact | 1.00 (0.88–1.00), n=162 |
+| Legerconcentratie midgame | 1.00 (0.86–1.00), n=69 |
+| Legerconcentratie lategame | 0.73 (0.73–0.73), n=1 |
+| Legerconcentratie end | 0.92 (0.77–1.00), n=138 |
+
+## F. Economie en uitbreiding
+
+| Metriek | Alle | allies | soviets | psi |
+| --- | --- | --- | --- | --- |
+| Inkomen minuut 3 ($/min) | 3531 (2193–4900), n=162 | 4025 (2275–4900), n=54 | 4200 (2800–5565), n=54 | 2975 (2100–4200), n=54 |
+| Inkomen minuut 6 ($/min) | 2914 (1109–4058), n=162 | 3097 (1181–3931), n=54 | 2144 (928–3708), n=54 | 2918 (1254–4283), n=54 |
+| Inkomen minuut 10 ($/min) | 1107 (0–1829), n=44 | 1452 (600–2280), n=11 | 952 (0–1876), n=19 | 1080 (19–1615), n=14 |
+| Inkomen minuut 15 ($/min) | 1392 (1213–1689), n=4 | 1400 (1050–1978), n=3 | – | 1384 (1384–1384), n=1 |
+| Besteed minuut 3 ($/min) | 3501 (2101–4260), n=162 | 3586 (2136–4318), n=54 | 3895 (2269–4623), n=54 | 2308 (2099–3632), n=54 |
+| Besteed minuut 6 ($/min) | 3088 (1714–4107), n=162 | 3255 (1732–4210), n=54 | 2846 (1267–3875), n=54 | 3014 (2108–4105), n=54 |
+| Besteed minuut 10 ($/min) | 1325 (76–1986), n=44 | 1871 (611–2451), n=11 | 1387 (85–2019), n=19 | 1081 (25–1616), n=14 |
+| Besteed minuut 15 ($/min) | 1474 (1225–1745), n=4 | 1400 (1050–1868), n=3 | – | 1548 (1548–1548), n=1 |
+| Velden met eigen raffinaderij (ooit) | 1 (1–1), n=162 | 1 (1–1), n=54 | 1 (1–1), n=54 | 1 (1–1), n=54 |
+| Startveld < 25% (min) | 3.17 (2.83–4.17), n=162 | 3.17 (2.83–4.17), n=54 | 3.17 (2.83–3.96), n=54 | 3.33 (3.00–4.33), n=54 |
+| Tweede CY (min) | – | – | – | – |
+| Inkomen uit Fuel Rigs ($, heel potje) | 0 (0–525), n=162 | 0 (0–840), n=54 | 0 (0–0), n=54 | 0 (0–233), n=54 |
+| Harassment: kosten per raid (min inkomen) | 1.45 (1.13–1.71), n=85 | 1.37 (0.88–1.70), n=24 | 1.39 (1.16–1.68), n=31 | 1.58 (1.31–1.73), n=30 |
+| Harassment netto (min inkomen, min daling aanvaller) | 0.14 (-0.13–0.71), n=85 | 0.28 (-0.12–0.76), n=24 | 0.12 (-0.17–0.54), n=31 | 0.12 (-0.08–0.82), n=30 |
+
+| Metriek | Waarde |
+| --- | --- |
+| Startveld ooit < 25% | 162/162 (100%) |
+| Speler met een tweede CY | 0/162 (0%) |
+| Winst met tweede CY | – |
+| Winst zonder tweede CY | 81/162 (50%) |
+| Raids op de economie die ≥ 1 min inkomen kosten, netto (signaal fase 23) | 18/98 (18%) |
+| Patstellingen | 0/81 (0%) |
+
+## G. Gebruik en balans
+
+Factiebalans (beslissing 21): winrate in **niet-spiegelpotjes**, patstelling = gespeeld en niet gewonnen, met 95%-Wilson-interval. Daarnaast het aandeel van alle overwinningen (maat van het balansplan).
+
+| Factie | Winrate niet-spiegel | 95%-interval | Aandeel overwinningen (alle potjes) |
+| --- | --- | --- | --- |
+| allies | 21/36 (58%) | 42%–73% | 30/81 |
+| soviets | 18/36 (50%) | 34%–66% | 27/81 |
+| psi | 15/36 (42%) | 27%–58% | 24/81 |
+
+Zetelbias (spiegelpotjes): speler 0 wint 12 van 27.
+
+| Eenheid | Gebouwd | Kills | Kosten-efficiëntie | % overleeft ≥ 60 s |
+| --- | ---: | ---: | ---: | ---: |
+| Rifleman (`rifle`) | 467 | 121 | 0.53 | 92% |
+| Warden Tank (`tank_allies`) | 425 | 729 | 2.18 | 79% |
+| Anvil Heavy Tank (`tank_soviets`) | 331 | 680 | 2.09 | 89% |
+| Lash Tank (`tank_psi`) | 318 | 663 | 2.09 | 81% |
+| Lancer IFV (`ifv`) | 204 | 175 | 1.03 | 79% |
+| Ore Hauler (`miner`) | 172 | 0 | 0.00 | 69% |
+| Rocket Trooper (`rocket`) | 167 | 117 | 1.78 | 86% |
+| Adept (`initiate`) | 152 | 60 | 1.03 | 90% |
+| Mauler (`brute`) | 135 | 83 | 0.95 | 86% |
+| Engineer (`engineer`) | 127 | 0 | 0.00 | 93% |
+| Spinner Tank (`gatling`) | 126 | 137 | 1.12 | 81% |
+| Thrall Hauler (`thrallhauler`) | 96 | 0 | 0.00 | 60% |
+| Scout Jeep (`jeep`) | 94 | 61 | 0.41 | 82% |
+| Refractor Tank (`prism`) | 78 | 146 | 0.95 | 69% |
+| Arc Trooper (`arc`) | 48 | 58 | 1.68 | 77% |
+| Colossus Tank (`heavy`) | 39 | 191 | 2.77 | 77% |
+| Magnetar (`magnetar`) | 34 | 116 | 2.93 | 85% |
+| Longbow Launcher (`artillery`) | 32 | 57 | 1.98 | 91% |
+| Leech Drone (`leechdrone`) | 31 | 2 | 0.00 | 77% |
+| Siege Rotor (`siegerotor`) | 21 | 22 | 0.53 | 81% |
+| Shroud Tank (`shroudtank`) | 18 | 38 | 1.79 | 72% |
+| Thunderhead Airship (`airship`) | 16 | 46 | 0.91 | 75% |
+| Delirium Drone (`deliriumdrone`) | 15 | 0 | 0.00 | 80% |
+| Flak Hauler (`flakhauler`) | 14 | 3 | 0.39 | 43% |
+| Mentalist (`mentalist`) | 12 | 7 | 0.06 | 58% |
+| Hover Disc (`disc`) | 10 | 55 | 3.45 | 100% |
+| Flak Gunner (`flakgunner`) | 9 | 1 | 0.07 | 89% |
+| Skyjumper (`skyjumper`) | 7 | 2 | 0.10 | 43% |
+| Phase Trooper (`phasetrooper`) | 7 | 1 | 0.07 | 14% |
+| Toxin Sniper (`toxin`) | 7 | 3 | 0.26 | 71% |
+| Sapper (`sapper`) | 4 | 5 | 1.73 | 75% |
+| Blight Trooper (`blight`) | 4 | 3 | 0.28 | 75% |
+| Hivemind (`hivemind`) | 3 | 0 | 0.00 | 67% |
+| Nova (`nova`) | 1 | 6 | 4.93 | 100% |
+| Grom (`grom`) | 1 | 1 | 0.57 | 100% |
+
+## Verliesoorzaken (plan/fun-pass-verliesclassificatie.md, geijkt: docs/metingen/grenzen.md §3)
+
+| Code | Hoofdoorzaak | Geldige oorzaak |
+| --- | ---: | ---: |
+| EU | 0/81 | 0/81 |
+| ES | 14/81 | 18/81 |
+| PB | 0/81 | 0/81 |
+| SC | 0/81 | 1/81 |
+| BG | 40/81 | 45/81 |
+| SW | 0/81 | 0/81 |
+| OV | 0/81 | 0/81 |
+| VA | 0/81 | 0/81 |
+| X | 27/81 | – |
+
+Kosteneffectiviteit per unit zonder micro en terrein: duelmatrix `DUELS=1 npx vitest run duels` (`docs/balans/`).

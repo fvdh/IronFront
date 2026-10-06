@@ -61,9 +61,11 @@ function removeDead(s: GameState) {
   s.entities = s.entities.filter((e) => e.hp > 0);
 }
 
-/** A player is out when they have no buildings and no armed units left. */
+/** A player is out when they have no buildings left (walls and captured tech buildings don't count) and no
+ *  Base Crawler to start over. Units alone don't keep you in: a lone aircraft nobody can reach used to stall
+ *  the game forever (Fun Pass, stalemates in docs/metingen/2026-10-06-nederlaag-hypothese.md). */
 export function isDefeated(s: GameState, owner: number) {
-  return !s.entities.some((e) => e.owner === owner && e.hp > 0 && (e.kind === 'building' ? !BUILDINGS[e.def].wall && !BUILDINGS[e.def].neutralOnly : !!UNITS[e.def].weapon || !!UNITS[e.def].deploysTo));
+  return !s.entities.some((e) => e.owner === owner && e.hp > 0 && (e.kind === 'building' ? !BUILDINGS[e.def].wall && !BUILDINGS[e.def].neutralOnly : !!UNITS[e.def].deploysTo));
 }
 
 export function checkVictory(s: GameState) {

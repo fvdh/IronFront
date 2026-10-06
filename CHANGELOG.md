@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased (Fun Pass 1.4, in progress)
+
+- **Defeat rule:** you are out when you have no buildings left and no Base Crawler. Units alone no longer keep you in the game (a lone airship nobody could reach used to stall it forever).
+- **Anti-air vs heavy aircraft:** Psi Spinner Tank and Gatling Cannon, and Red Bloc Flak Gunner and Flak Hauler now properly damage the Thunderhead Airship; their ground fight is unchanged.
+- **AI remembers and searches:** the AI keeps track of what it has seen, checks old sightings with a scout and searches the map in a fixed order when it loses track of you. Moving your base no longer hides you.
+- Measuring: match export also records Fuel Rig income and free units; new metric for harassment cost.
+
 ## 1.3.0 — 2026-10-06
 
 Balance round for units (`plan/balans-plan.md`, numbers in `docs/TODO.md`).
