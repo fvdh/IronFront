@@ -68,7 +68,7 @@ export const WEAPONS: Record<string, WeaponDef> = {
   novaPistols: { damage: 160, range: 5.5, cooldown: 22, speed: 0, visual: 'tracer', color: '#fff6c0', versus: { none: 1, light: 0, heavy: 0, building: 0 }, sound: 'gun' },
   c4: { damage: 0, range: 1.1, cooldown: 150, speed: 0, visual: 'tracer', color: '#ff7040', versus: { none: 0, light: 0, heavy: 0, building: 1 }, fuse: 90, blast: 'c4Blast', sound: 'cannon' },
   c4Blast: { damage: 1250, range: 0, cooldown: 0, speed: 0, visual: 'shell', color: '#ff7040', versus: { none: 0, light: 0, heavy: 0, building: 1 }, splash: 0.5, sound: 'cannon' },
-  flakRifle: { damage: 26, range: 5.5, cooldown: 30, speed: 0, visual: 'tracer', color: '#ffd890', versus: { none: 0.8, light: 0.5, heavy: 0.15, building: 0.1 }, aa: true, splash: 0.6, sound: 'gun' },
+  flakRifle: { damage: 26, range: 5.5, cooldown: 30, speed: 0, visual: 'tracer', color: '#ffd890', versus: { none: 0.8, light: 0.5, heavy: 0.15, building: 0.1 }, aa: true, versusAir: { heavy: 0.6 }, splash: 0.6, sound: 'gun' },
   timeBomb: { damage: 0, range: 1.2, cooldown: 90, speed: 0, visual: 'tracer', color: '#ff9040', versus: { none: 1, light: 1, heavy: 1, building: 1 }, fuse: 150, blast: 'sapperBlast', sound: 'gun' },
   sapperBlast: { damage: 450, range: 0, cooldown: 0, speed: 0, visual: 'shell', color: '#ffb060', versus: { none: 1, light: 1, heavy: 1, building: 1.2 }, splash: 1.8, sound: 'cannon' },
   radRifle: { damage: 75, range: 4.5, cooldown: 50, speed: 0, visual: 'beam', color: '#b8ff40', versus: { none: 1, light: 0.3, heavy: 0.1, building: 0.05 }, sound: 'zap' },
@@ -94,7 +94,7 @@ export const WEAPONS: Record<string, WeaponDef> = {
   hiveControl: { damage: 0, range: 6, cooldown: 40, speed: 0, visual: 'beam', color: '#f0a0ff', versus: { none: 1, light: 1, heavy: 1, building: 0 }, control: true, maxControl: 3, sound: 'zap' },
   deliriumGas: { damage: 10, range: 3, cooldown: 90, speed: 0, visual: 'beam', color: '#d8e060', versus: { none: 1, light: 0.5, heavy: 0.3, building: 0 }, splash: 2, berserk: 300, sound: 'zap' },
   // --- Phase 7 ---
-  flakGun: { damage: 22, range: 6, cooldown: 20, speed: 0, visual: 'tracer', color: '#ffd890', versus: { none: 0.9, light: 0.7, heavy: 0.2, building: 0.15 }, aa: true, sound: 'gun' },
+  flakGun: { damage: 22, range: 6, cooldown: 20, speed: 0, visual: 'tracer', color: '#ffd890', versus: { none: 0.9, light: 0.7, heavy: 0.2, building: 0.15 }, aa: true, versusAir: { heavy: 1 }, sound: 'gun' },
   samMissile: { damage: 70, range: 9, cooldown: 40, speed: 0.6, visual: 'rocket', color: '#ffe0a0', versus: { none: 1, light: 1, heavy: 1, building: 0 }, aa: true, airOnly: true, sound: 'rocket' },
   flakCannon: { damage: 40, range: 8, cooldown: 25, speed: 0, visual: 'tracer', color: '#ffc870', versus: { none: 1, light: 1, heavy: 1, building: 0 }, aa: true, airOnly: true, splash: 1.0, sound: 'cannon' },
   // --- Phase 12: superweapons ---

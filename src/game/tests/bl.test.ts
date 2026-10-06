@@ -11,6 +11,8 @@ describe('BL2: anti-air against heavy aircraft', () => {
     const airship = spawnUnit(s, 'airship', 1, 20, 20), tank = spawnUnit(s, 'tank_soviets', 1, 24, 20);
     expect(versusOf(WEAPONS.gatling, airship)).toBe(0.8);
     expect(versusOf(WEAPONS.gatling, tank)).toBe(0.3); // the ground fight is unchanged
-    expect(versusOf(WEAPONS.flakGun, airship)).toBe(WEAPONS.flakGun.versus.heavy); // no override: armour table
+    expect(versusOf(WEAPONS.rocket, airship)).toBe(WEAPONS.rocket.versus.heavy); // no override: armour table
+    expect(versusOf(WEAPONS.flakGun, airship)).toBe(1); // BL2 iteration 2 (Red Bloc)
+    expect(versusOf(WEAPONS.flakGun, tank)).toBe(0.2);
   });
 });
