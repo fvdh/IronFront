@@ -62,6 +62,12 @@ function check(s: GameState, still: Map<number, { x: number; y: number; t: numbe
     else if (isMoving(e) && s.tick - last.t > 30 * TICK_RATE) { bad.push(`${e.def}#${e.id} stuck (${e.order.type}) at ${e.x.toFixed(1)},${e.y.toFixed(1)}`); still.set(e.id, { x: e.x, y: e.y, t: s.tick }); }
   }
   if (s.hazards?.some((h) => h.until < s.tick)) bad.push('expired hazard kept');
+  // 26.A: the AI only remembers what it saw: every remembered building lies in ground it has explored, at its real spot.
+  for (const a of s.ai) for (const m of a.memory?.buildings ?? []) {
+    if (!s.players[a.player].explored[Math.floor(m.y) * s.map.w + Math.floor(m.x)]) bad.push(`P${a.player} remembers a building in unexplored ground`);
+    const e = s.rt.byId.get(m.id);
+    if (e && e.hp > 0 && Math.hypot(e.x + BUILDINGS[e.def].w / 2 - m.x, e.y + BUILDINGS[e.def].h / 2 - m.y) > 0.01) bad.push(`P${a.player} remembers building #${m.id} at the wrong spot`);
+  }
   for (const p of s.players) if (p.ai && s.entities.filter((e) => e.owner === p.id && e.kind === 'unit' && UNITS[e.def].hero).length > 1) bad.push(`P${p.id} has two heroes`);
   for (let i = 0; i < grid.length; i++) if (grid[i] !== s.rt.grid[i]) { bad.push(`occupancy grid out of sync at ${i}`); break; }
   return bad;

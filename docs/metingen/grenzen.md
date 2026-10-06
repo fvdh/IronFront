@@ -86,4 +86,4 @@ Resultaat: X (geen oorzaak) in 3 van 26 potjes (12%), dus onder de grens van 1 o
 3. **Een uitbreiding is de eerste raffinaderij of CY die af is (geplaatst of uitgeklapt) en bij een veld hoort dat geen startveld is.** Het moment is de tick van plaatsen of uitklappen.
 4. Bij twee kandidaten telt de vroegste tick. Een gebouw in aanbouw of een CY die nog niet is uitgeklapt telt niet.
 
-**Effect op de nulmeting:** de nep-uitbreidingen na 0,5 min op Islands zijn weg; geen enkele AI breidt uit, op land en op zee. Daardoor schuift de tijd tot de eerste strategische keuze op zee van 2,8 naar 3,2 min (mediaan).
+**Effect op de nulmeting:** de nep-uitbreidingen na 0,5 min op Islands zijn weg; op zee en op Normal-medium breidt geen AI uit. Op land (small) telt bij 19 van de 162 spelers de tweede raffinaderij na ±2,5 min als uitbreiding: die staat bij een veld verder dan 10 tegels van de start. _(Correctie 2026-10-06: eerder stond hier dat geen enkele AI uitbreidt.)_ Daardoor schuift de tijd tot de eerste strategische keuze op zee van 2,8 naar 3,2 min (mediaan).

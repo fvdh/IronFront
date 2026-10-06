@@ -9,7 +9,7 @@ import { capLeft, catalog, hasBuilding, missingRequirements, priceOf, PRODUCER, 
 declare const __BUILD__: string | undefined;
 
 /** Bumped on every change to the AI (systems/ai.ts), so runs on different AIs never get mixed up. */
-export const AI_VERSION = 1;
+export const AI_VERSION = 2; // 2: memory and ordered search (Fun Pass 26.A)
 /** Build id: version + bundle hash in a real build (vite define), 'dev' otherwise. */
 export const BUILD: string = typeof __BUILD__ !== 'undefined' ? __BUILD__ : 'dev';
 

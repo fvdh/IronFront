@@ -483,7 +483,7 @@ Bekende beperkingen (bewust niet gedaan):
 **Grenzen bevroren** (2026-10-06): `docs/metingen/grenzen.md`.
 - Doel- en alarmgrenzen gescheiden: een alarm is een onderzoeksopdracht, geen reden voor een gameplaywijziging.
 - IJking verliesclassificatie ingevoerd in `verlies.ts`: PB < 30%, BG ≥ 90%, ES alleen vóór het kantelpunt K.
-- "Eerste uitbreiding" gebruikt nu alle startvelden binnen 10 tegels (`startFields` in `meting.ts`); de nep-uitbreidingen op Islands zijn weg.
+- "Eerste uitbreiding" gebruikt nu alle startvelden binnen 10 tegels (`startFields` in `meting.ts`); de nep-uitbreidingen op Islands zijn weg. Op land (small) telt de tweede raffinaderij van 19 van 162 AI-spelers nog als uitbreiding (veld > 10 tegels).
 - Nieuw: `RECOMPUTE=a.raw.json,… npx vitest run balance` bouwt rapporten opnieuw uit de ruwe telemetrie, zonder te simuleren. Alle nulmetingsrapporten zijn zo herberekend; het ore-harnas blijft identiek.
 - Bevinding: op zee slaat PB in 36/36 verloren potjes aan (richtwaarde > 60%) → onderzoeken op overgevoeligheid.
 - Open: harassment-kosten (signaal fase 23) is nog geen metriek.
@@ -495,3 +495,10 @@ Bekende beperkingen (bewust niet gedaan):
 - **Harassment-kosten** (signaal fase 23): `harassment()` in `meting.ts`, bruto en netto (min de daling bij de aanvaller). Nulmeting: netto mediaan 0,1–0,3 min inkomen per raid, dus het signaal "harassment kost < 1 min" staat op **ja**.
 - Tests: rig en `spawned` live in een echt potje, harassment op opgebouwde telemetrie (ook het geval "velden leeg, geen raid-effect"). Determinisme blijft gelijk; de export-e2e slaagt.
 - Oude exports blijven leesbaar: `rigIncome` is dan `null`.
+
+### Fun Pass 26.A: AI-geheugen en zoeken (2026-10-06, branch `fase-26a`)
+- `ai.ts`: geheugen (gebouwen als kennis of aanname met leeftijd, legers, eigen gevechtsplekken), doelkeuze op dat geheugen, zoeken in de vaste volgorde van het plan, verkenners bij verouderde info of als de AI de vijand kwijt is. Geen openingsverkenner (besluit opdrachtgever). `AI_VERSION` = 2.
+- Tests: `ai-intent.test.ts` (exploit-test 8 potjes: AI 2 vindt 8/8 binnen 1,1 min, AI 1 maar 2/8; eerlijkheid van het geheugen), soak-invariant "onthoudt alleen wat ze zag".
+- Referentiemeting `ref-26a`: opening identiek aan de nulmeting, verschillen klein en binnen de intervallen. Samenvatting: `docs/metingen/2026-10-06-ref-26a-samenvatting.md`.
+- Bevinding: patstellingen op Normal-medium 2/27 (doelgrens 2%), allebei een onneembare Thunderhead in een Red Bloc-spiegelpotje (ook de ene patstelling van de nulmeting). Hoort bij BL2.
+- Correctie: op land (small) telt bij 19 van 162 AI-spelers de tweede raffinaderij als uitbreiding; eerder stond in de documentatie dat geen AI uitbreidt.

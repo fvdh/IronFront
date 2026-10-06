@@ -3,7 +3,7 @@ import { DIFFICULTY, TICK_RATE } from '../data/config';
 import { UNITS } from '../data/units';
 import { FACTIONS } from '../data/factions';
 import { centerX, centerY, distTo, ownBuildings } from '../core/entities';
-import type { AIState, Entity, GameState } from '../types';
+import type { AIMemory, AIState, Entity, GameState } from '../types';
 import { startPositions } from '../world/mapgen';
 import { nextRandom, regions, T, terrainPassable } from '../world/map';
 import { canSee, weaponOf } from './combat';
@@ -18,6 +18,13 @@ import { WEAPONS } from '../data/weapons';
 
 // The AI only uses information the fog allows: visible units, remembered buildings and
 // public map knowledge (terrain, ore, possible start locations).
+// 26.A: memory (ai.memory) separates what it sees now from what it assumes, and an ordered search replaces random scouting.
+
+const ARMY_MEMORY = 180 * TICK_RATE; // an enemy army sighting is forgotten after 3 min
+const FIGHT_MEMORY = 120 * TICK_RATE; // a spot where we were hit counts as "recent fight" for 2 min
+const RECHECK = 120 * TICK_RATE; // a search spot seen empty (or sent to) is searched again after 2 min
+const MERGE = 6; // sightings closer than this (tiles) are one spot
+const VERIFY = 60 * TICK_RATE; // known buildings not seen for this long: send a scout to look again
 
 export function createAI(player: number, difficulty: keyof typeof DIFFICULTY): AIState {
   return { player, nextThink: 0, attackWave: 0, nextAttack: DIFFICULTY[difficulty].firstAttack * TICK_RATE, attacking: [], lastPlace: 0 };
@@ -37,6 +44,7 @@ export function aiTick(s: GameState, ai: AIState) {
   ai.nextThink = s.tick + cfg.think;
   const me = ai.player;
 
+  remember(s, ai);
   if (p.ready) placeReady(s, ai);
   crawlers(s, ai);
   planBuilding(s, me, cfg);
@@ -46,6 +54,7 @@ export function aiTick(s: GameState, ai: AIState) {
   support(s, ai);
   defend(s, ai, cfg);
   attack(s, ai, cfg);
+  scout(s, ai);
 }
 
 function planBuilding(s: GameState, me: number, cfg: (typeof DIFFICULTY)[keyof typeof DIFFICULTY]) {
@@ -154,7 +163,7 @@ function powers(s: GameState, ai: AIState) {
     const mid = wave.length >= 4 ? [wave.reduce((a, u) => a + u.x, 0) / wave.length, wave.reduce((a, u) => a + u.y, 0) / wave.length] : null;
     if (pw === 'stasis') { if (mid && s.entities.some((e) => e.owner !== me && e.owner !== s.neutral && e.hp > 0 && canSee(s, me, e) && Math.hypot(centerX(e) - mid[0], centerY(e) - mid[1]) < 7)) firePower(s, me, b.id, mid[0], mid[1]); continue; }
     if (pw === 'phasegate') {
-      const t = pickTarget(s, me);
+      const t = pickTarget(s, ai);
       if (mid && t && Math.hypot(t[0] - mid[0], t[1] - mid[1]) > 15) { const k = 5 / Math.hypot(t[0] - mid[0], t[1] - mid[1]); firePower(s, me, b.id, mid[0], mid[1], t[0] - (t[0] - mid[0]) * k, t[1] - (t[1] - mid[1]) * k); }
       continue;
     }
@@ -220,7 +229,7 @@ const toIdleAI = (u: Entity) => { u.order = { type: 'idle', tx: u.x, ty: u.y, ta
 
 /** No land route to the enemy (islands, a bridge down): an amphibious transport carries infantry across. */
 function ferry(s: GameState, ai: AIState) {
-  const me = ai.player, home = s.players[me], t = pickTarget(s, me);
+  const me = ai.player, home = s.players[me], t = pickTarget(s, ai);
   if (!t) return;
   const reg = regions(s.map), w = s.map.w;
   const at = (x: number, y: number) => reg[Math.floor(y) * w + Math.floor(x)];
@@ -366,7 +375,8 @@ function attack(s: GameState, ai: AIState, cfg: (typeof DIFFICULTY)[keyof typeof
   if (ai.attacking.length) {
     const idle = ai.attacking.filter((id) => s.rt.byId.get(id)!.order.type === 'idle');
     if (idle.length) {
-      const t = pickTarget(s, me);
+      const us = idle.map((id) => s.rt.byId.get(id)!);
+      const t = pickTarget(s, ai, [us.reduce((a, u) => a + u.x, 0) / us.length, us.reduce((a, u) => a + u.y, 0) / us.length], true);
       if (t) commandMove(s, me, idle, t[0], t[1], true);
     }
   }
@@ -379,7 +389,7 @@ function attack(s: GameState, ai: AIState, cfg: (typeof DIFFICULTY)[keyof typeof
   const overdue = s.tick > ai.nextAttack + cfg.waveGap * TICK_RATE && ready.length >= cfg.attackBase / 2; // waited a whole extra wave: go with what there is
   if (ready.length < need && !(spent && ready.length) && !overdue) return;
   if (!cfg.fullWaves) ready = ready.slice(0, need); // easy: the rest stays home
-  const t = pickTarget(s, me);
+  const t = pickTarget(s, ai, undefined, true);
   if (!t) return;
   commandMove(s, me, ready.map((u) => u.id), t[0], t[1], true);
   ai.attacking.push(...ready.map((u) => u.id));
@@ -388,35 +398,131 @@ function attack(s: GameState, ai: AIState, cfg: (typeof DIFFICULTY)[keyof typeof
   ai.nextAttack = s.tick + cfg.waveGap * TICK_RATE;
 }
 
-/** Nearest known enemy building; otherwise scout unexplored start locations; otherwise the map centre. */
-function pickTarget(s: GameState, me: number): [number, number] | null {
-  const home = s.players[me];
-  let best: Entity | undefined, bestD = Infinity;
+const tileVisible = (s: GameState, me: number, x: number, y: number) => s.players[me].visible[Math.floor(y) * s.map.w + Math.floor(x)] === 1;
+const merge = <T extends { x: number; y: number }>(list: T[], x: number, y: number) => list.find((a) => Math.hypot(a.x - x, a.y - y) < MERGE);
+
+/** Update the memory from what the AI sees right now. Only its own sight: a building that vanished out of sight
+ *  stays as an assumption until the AI looks there again. */
+function remember(s: GameState, ai: AIState): AIMemory {
+  const me = ai.player;
+  const mem = (ai.memory ??= { buildings: [], armies: [], fights: [], checked: {}, ore: oreSpots(s) });
+  const vis = (x: number, y: number) => tileVisible(s, me, x, y);
+  // Seen gone (destroyed, sold or taken over): drop it.
+  mem.buildings = mem.buildings.filter((b) => { if (!vis(b.x, b.y)) return true; const e = s.rt.byId.get(b.id); return !!e && e.hp > 0 && e.owner === b.owner; });
   for (const e of s.entities) {
-    if (e.owner === me || e.owner === s.neutral || e.kind !== 'building' || e.hp <= 0 || BUILDINGS[e.def].wall || !canSee(s, me, e)) continue;
-    const d = Math.hypot(centerX(e) - home.startX, centerY(e) - home.startY);
-    if (d < bestD) { bestD = d; best = e; }
+    if (e.owner === me || e.owner === s.neutral || e.hp <= 0) continue;
+    if (e.kind === 'building') {
+      const x = centerX(e), y = centerY(e);
+      if (BUILDINGS[e.def].wall || !vis(x, y)) continue;
+      const k = mem.buildings.find((b) => b.id === e.id);
+      if (k) k.seen = s.tick;
+      else mem.buildings.push({ id: e.id, def: e.def, owner: e.owner, x, y, seen: s.tick });
+    } else if (!e.inside && canSee(s, me, e)) {
+      const a = merge(mem.armies, e.x, e.y);
+      if (a) { a.x = e.x; a.y = e.y; a.seen = s.tick; } else mem.armies.push({ x: e.x, y: e.y, seen: s.tick });
+    }
   }
-  if (best) return [centerX(best), centerY(best)];
+  // An army spot we look at and nobody is there any more: it moved on.
+  mem.armies = mem.armies.filter((a) => s.tick - a.seen < ARMY_MEMORY && (a.seen === s.tick || !vis(a.x, a.y))).slice(-12);
+  // Where we were hit (we always know about our own losses).
   for (const e of s.entities)
-    if (e.owner !== me && e.owner !== s.neutral && e.hp > 0 && !e.inside && canSee(s, me, e)) return [e.x, e.y];
-  const w = s.map.w;
+    if (e.owner === me && e.hp > 0 && e.lastHit > s.tick - TICK_RATE * 2) {
+      const x = centerX(e), y = centerY(e), f = merge(mem.fights, x, y);
+      if (f) f.t = s.tick; else mem.fights.push({ x, y, t: s.tick });
+    }
+  mem.fights = mem.fights.filter((f) => s.tick - f.t < FIGHT_MEMORY).slice(-8);
+  return mem;
+}
+
+/** Ore mines (public map knowledge): the fields grow around them. */
+const oreSpots = (s: GameState): [number, number][] => s.map.oreSources.map((m) => [(m.i % s.map.w) + 0.5, Math.floor(m.i / s.map.w) + 0.5]);
+
+/** Where to send units. Known enemy buildings first (seen now: nearest to home; else the most recently seen
+ *  assumption), then visible enemy units, then unexplored enemy start corners, then the search.
+ *  `from`: where the units are (search goes from near to far); `claim`: mark the search spot as taken. */
+function pickTarget(s: GameState, ai: AIState, from?: [number, number], claim = false): [number, number] | null {
+  const me = ai.player, home = s.players[me], mem = ai.memory ?? remember(s, ai);
+  const o: [number, number] = from ?? [home.startX, home.startY];
+  const foe = (owner: number) => owner !== me && owner !== s.neutral && !s.players[owner]?.defeated;
+  const known = mem.buildings.filter((b) => foe(b.owner));
+  if (known.length) {
+    const now = known.filter((b) => b.seen === s.tick);
+    const dh = (b: { x: number; y: number }) => Math.hypot(b.x - home.startX, b.y - home.startY);
+    const best = now.length ? now.reduce((a, b) => (dh(b) < dh(a) ? b : a)) : known.reduce((a, b) => (b.seen > a.seen || (b.seen === a.seen && dh(b) < dh(a)) ? b : a));
+    return [best.x, best.y];
+  }
+  let unit: Entity | undefined, ud = Infinity;
+  for (const e of s.entities)
+    if (foe(e.owner) && e.hp > 0 && !e.inside && canSee(s, me, e)) { const d = Math.hypot(e.x - o[0], e.y - o[1]); if (d < ud) { ud = d; unit = e; } }
+  if (unit) return [unit.x, unit.y];
+  return unexploredStart(s, me) ?? search(s, ai, mem, o, claim);
+}
+
+/** Nearest enemy start corner we have never looked at (who started where is public). */
+function unexploredStart(s: GameState, me: number): [number, number] | null {
+  const home = s.players[me], w = s.map.w;
   const foes = s.players.filter((p) => p.id !== me && !p.neutral && !p.defeated);
   const unexplored = startPositions(w, s.map.h).filter(([x, y]) => !home.explored[(y + 1) * w + x + 1] && foes.some((p) => Math.hypot(x - p.startX, y - p.startY) < 3)); // only corners someone started in
-  if (unexplored.length) {
-    unexplored.sort((a, b) => Math.hypot(a[0] - home.startX, a[1] - home.startY) - Math.hypot(b[0] - home.startX, b[1] - home.startY));
-    return [unexplored[0][0] + 1.5, unexplored[0][1] + 1.5];
+  if (!unexplored.length) return null;
+  unexplored.sort((a, b) => Math.hypot(a[0] - home.startX, a[1] - home.startY) - Math.hypot(b[0] - home.startX, b[1] - home.startY));
+  return [unexplored[0][0] + 1.5, unexplored[0][1] + 1.5];
+}
+
+/** Scouting (26.A), never in the opening. Known buildings not seen for a while: one unit goes to look at the youngest assumption.
+ *  Nothing known at all: up to three idle units outside the wave search, each its own spot. Fresh info: scouts come home. */
+function scout(s: GameState, ai: AIState) {
+  const me = ai.player, mem = ai.memory!, home = s.players[me];
+  const known = mem.buildings.filter((b) => b.owner !== me && b.owner !== s.neutral && !s.players[b.owner]?.defeated);
+  const fresh = known.some((b) => s.tick - b.seen < VERIFY);
+  const inWave = new Set(ai.attacking);
+  ai.scouts = (ai.scouts ?? []).filter((id) => { const u = s.rt.byId.get(id); return !!u && u.hp > 0 && u.owner === me && !inWave.has(id); });
+  if (fresh) {
+    for (const id of ai.scouts) { const u = s.rt.byId.get(id)!; if (!isMoving(u) && Math.hypot(u.x - home.startX, u.y - home.startY) > 12) commandMove(s, me, [id], home.startX, home.startY); }
+    ai.scouts = [];
+    return;
   }
-  // Nothing known: search — first around the enemy start corners (where their last buildings usually are), then the whole map.
-  const corners = foes.map((p) => [p.startX, p.startY]); // who started where is public knowledge
-  for (let k = 0; k < 40 && corners.length; k++) {
-    const [cx, cy] = corners[Math.floor(nextRandom(s) * corners.length)];
-    const x = Math.floor(cx + (nextRandom(s) - 0.5) * 20), y = Math.floor(cy + (nextRandom(s) - 0.5) * 20), i = y * w + x;
-    if (x >= 0 && y >= 0 && x < w && y < s.map.h && !home.visible[i] && terrainPassable(s.map, i)) return [x + 0.5, y + 0.5];
+  if (!known.length && unexploredStart(s, me)) return; // never looked yet: no opening scout, the first wave goes to their start corner
+  const want = known.length ? 1 : 3;
+  const free = army(s, me).filter((e) => !inWave.has(e.id) && !ai.scouts!.includes(e.id) && UNITS[e.def].move !== 'water').sort((a, b) => UNITS[b.def].speed - UNITS[a.def].speed);
+  while (ai.scouts.length < want && free.length) ai.scouts.push(free.shift()!.id);
+  for (const id of ai.scouts) {
+    const u = s.rt.byId.get(id)!;
+    if (isMoving(u)) continue;
+    const old = known.reduce<(typeof known)[number] | undefined>((a, b) => (!a || b.seen > a.seen ? b : a), undefined);
+    const t: [number, number] = old && !tileVisible(s, me, old.x, old.y) ? [old.x, old.y] : search(s, ai, mem, [u.x, u.y], true, !UNITS[u.def].air);
+    commandMove(s, me, [id], t[0], t[1]);
   }
-  for (let k = 0; k < 40; k++) {
-    const x = Math.floor(nextRandom(s) * w), y = Math.floor(nextRandom(s) * s.map.h), i = y * w + x;
-    if (!home.visible[i] && terrainPassable(s.map, i)) return [x + 0.5, y + 0.5];
+}
+
+/** Ordered search (26.A): recent fights → ore → tech and town buildings → last known positions → the rest of the map;
+ *  within each group from near to far. Spots seen empty in the last 2 min are skipped. */
+function search(s: GameState, ai: AIState, mem: AIMemory, o: [number, number], claim: boolean, ground = false): [number, number] {
+  const me = ai.player, { w, h } = s.map;
+  // Ground searchers skip spots they can't drive to (another island, a closed plateau).
+  const reg = regions(s.map), here = reg[Math.floor(o[1]) * w + Math.floor(o[0])];
+  const reach = (p: [number, number]) => !ground || here < 0 || reg[Math.floor(p[1]) * w + Math.floor(p[0])] === here;
+  const grid: [number, number][] = [];
+  for (let y = 4; y < h; y += 8) for (let x = 4; x < w; x += 8) if (terrainPassable(s.map, y * w + x)) grid.push([x + 0.5, y + 0.5]);
+  const never = (p: [number, number]) => !s.players[me].explored[Math.floor(p[1]) * w + Math.floor(p[0])];
+  const groups: [number, number][][] = [
+    mem.fights.map((f) => [f.x, f.y]),
+    mem.ore,
+    s.entities.filter((e) => e.kind === 'building' && BUILDINGS[e.def].neutralOnly && !BUILDINGS[e.def].bridge && (e.seenBy & (1 << me))).map((e) => [centerX(e), centerY(e)]),
+    [...mem.armies.map((a): [number, number] => [a.x, a.y]), ...s.players.filter((p) => p.id !== me && !p.neutral && !p.defeated).map((p): [number, number] => [p.startX, p.startY])],
+    grid.filter(never), // the rest of the map: never seen first
+    grid,
+  ];
+  const key = ([x, y]: [number, number]) => `${Math.floor(x)},${Math.floor(y)}`;
+  for (const g of groups) {
+    const open = g.filter((p) => {
+      if (!reach(p)) return false;
+      if (tileVisible(s, me, p[0], p[1])) { mem.checked[key(p)] = s.tick; return false; }
+      return s.tick - (mem.checked[key(p)] ?? -Infinity) >= RECHECK;
+    });
+    if (!open.length) continue;
+    const best = open.reduce((a, b) => (Math.hypot(b[0] - o[0], b[1] - o[1]) < Math.hypot(a[0] - o[0], a[1] - o[1]) ? b : a));
+    if (claim) mem.checked[key(best)] = s.tick;
+    return best;
   }
-  return [w / 2, s.map.h / 2];
+  return [w / 2, h / 2];
 }

@@ -94,7 +94,7 @@ EU, SW, OV en VA komen in AI-tegen-AI niet voor, bij geen enkele waarde. Dat is 
 
 ## Open punten en beperkingen
 
-1. ~~**Definitie "eerste uitbreiding"**~~ Opgelost (2026-10-06): startvelden zijn alle velden binnen 10 tegels (`grenzen.md` §4). Rapporten herberekend; geen enkele AI breidt uit, ook niet op zee. **PB op zee** slaat na de ijking in 36/36 verloren potjes aan: onderzoeken op overgevoeligheid (`grenzen.md` §3).
+1. ~~**Definitie "eerste uitbreiding"**~~ Opgelost (2026-10-06): startvelden zijn alle velden binnen 10 tegels (`grenzen.md` §4). Rapporten herberekend; op zee en Normal-medium breidt geen AI uit, op land (small) telt bij 19 van 162 spelers de tweede raffinaderij als uitbreiding (±2,5 min). **PB op zee** slaat na de ijking in 36/36 verloren potjes aan: onderzoeken op overgevoeligheid (`grenzen.md` §3).
 2. ~~**Harassment-kosten**~~ Toegevoegd (2026-10-06, 20.2-F) en uit de ruwe telemetrie berekend; zie de tabel hierboven. Beperking: ook de eindaanval op een basis telt als raid als er nog 2 min resten.
 3. ~~**Gratis Haulers**~~ Nieuwe exports hebben een `spawned`-event (Haulers bij een raffinaderij, escorte-Thralls, Mutagen-Brutes) en een statistiek per speler met overnames. **Mind control** telt nog steeds niet als kill. De nulmeting zelf heeft deze events niet.
 4. **AI-potjes zijn te kort voor fase 24.** Wil je het kernsignaal toch uit AI-potjes halen, dan is een extra meetset nodig met langere potjes (bijv. medium/large, Normal). Dat is een besluit, geen bevinding.
