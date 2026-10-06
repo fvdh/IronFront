@@ -71,7 +71,9 @@ export function classify(rec: MatchRecord, loser?: number): Classification | nul
   const secs = Math.max(S[0].length, S[1].length), span = VERLIES.PB.minutes * 60;
   for (let i = span; i < secs; i++) {
     let have = 0, run = 0;
-    for (let k = i - span; k < i; k++) { const a = S[0][k] ?? '-', b = S[1][k] ?? '-'; if (a === '-' && b === '-') continue; have++; if (a === 'L' || b === 'L') run++; }
+    // Only seconds with money count (L running, K idle with money); short of money (G, A) is not "money not spent".
+    // Correction 2026-10-06 (docs/metingen/grenzen.md §3): before, G and A counted as downtime.
+    for (let k = i - span; k < i; k++) { const a = S[0][k] ?? '-', b = S[1][k] ?? '-'; if (a !== 'L' && a !== 'K' && b !== 'L' && b !== 'K') continue; have++; if (a === 'L' || b === 'L') run++; }
     const t = (i + 1) * TICK_RATE;
     const idleRich = ls.filter((s) => s.t > t - span * TICK_RATE && s.t <= t);
     const unused = idleRich.length > 0 && idleRich.every((s) => { const k = s.t / TICK_RATE - 1; return s.credits > VERLIES.PB.unused && (S[0][k] === 'K' || S[1][k] === 'K'); });

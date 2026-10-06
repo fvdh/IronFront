@@ -193,6 +193,7 @@ describe('loss classification', () => {
   it('PB: production standing still for 3 minutes with even income', () => {
     expect(lose({ samples: [['', '', ''], ['', 'K'.repeat(1200), 'K'.repeat(1200)]] }).causes.PB).toBeDefined();
     expect(lose({ samples: [['', '', ''], ['', 'L'.repeat(1200), 'L'.repeat(1200)]] }).causes.PB).toBeUndefined();
+    expect(lose({ samples: [['', '', ''], ['', 'G'.repeat(1200), 'A'.repeat(1200)]] }).causes.PB, 'broke is not "money not spent"').toBeUndefined();
   });
   it('SC: lost to aircraft without anti-air', () => {
     const air = [death(16 * M, 1, 'tank_soviets', { killer: 'jet', cost: 900 }), death(16 * M + 10, 1, 'tank_soviets', { killer: 'jet', cost: 900 })];

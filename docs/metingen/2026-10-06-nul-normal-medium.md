@@ -171,13 +171,13 @@ Zetelbias (spiegelpotjes): speler 0 wint 4 van 8.
 | Code | Hoofdoorzaak | Geldige oorzaak |
 | --- | ---: | ---: |
 | EU | 0/26 | 0/26 |
-| ES | 3/26 | 7/26 |
-| PB | 10/26 | 14/26 |
+| ES | 5/26 | 7/26 |
+| PB | 0/26 | 0/26 |
 | SC | 0/26 | 2/26 |
-| BG | 10/26 | 15/26 |
+| BG | 15/26 | 15/26 |
 | SW | 0/26 | 0/26 |
 | OV | 0/26 | 0/26 |
 | VA | 0/26 | 0/26 |
-| X | 3/26 | – |
+| X | 6/26 | – |
 
 Kosteneffectiviteit per unit zonder micro en terrein: duelmatrix `DUELS=1 npx vitest run duels` (`docs/balans/`).

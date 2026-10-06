@@ -87,3 +87,16 @@ Resultaat: X (geen oorzaak) in 3 van 26 potjes (12%), dus onder de grens van 1 o
 4. Bij twee kandidaten telt de vroegste tick. Een gebouw in aanbouw of een CY die nog niet is uitgeklapt telt niet.
 
 **Effect op de nulmeting:** de nep-uitbreidingen na 0,5 min op Islands zijn weg; op zee en op Normal-medium breidt geen AI uit. Op land (small) telt bij 19 van de 162 spelers de tweede raffinaderij na ±2,5 min als uitbreiding: die staat bij een veld verder dan 10 tegels van de start. _(Correctie 2026-10-06: eerder stond hier dat geen enkele AI uitbreidt.)_ Daardoor schuift de tijd tot de eerste strategische keuze op zee van 2,8 naar 3,2 min (mediaan).
+
+## Correctie 2026-10-06: definitie PB (akkoord opdrachtgever)
+Onderzoek naar de overgevoeligheid van PB op zee (`2026-10-06-bl1-onderzoek.md`): PB telde "wacht op geld" (`G`) en "te arm" (`A`) als stilstand. PB sloeg dus aan bij spelers **zonder** geld, terwijl de categorie "geld niet besteed" betekent.
+- **Nieuw:** voor de productie-uptime van PB tellen alleen seconden met geld: `L` (draait) en `K` (stil met geld). De drempel van 30% blijft.
+- Alle runs zijn herberekend uit de ruwe telemetrie. Resultaat: PB slaat in **geen enkel** AI-verlies meer aan; de AI houdt zelden geld over. Het aandeel "geen oorzaak" (X) stijgt:
+
+| Run | X vóór | X na |
+|---|---|---|
+| `nul-normal-medium` (ijkset) | 3/26 (12%) | 6/26 (23%) |
+| `nul-land` | 13/81 (16%) | 30/81 (37%) |
+| `nul-zee` | 0/36 | 8/36 (22%) |
+
+**Bevinding:** de ijking van PB (30%) gebeurde op de foute definitie. In de ijkset blijft X onder 1 op 4, op land (Hard, small) niet. Dat de AI-verliezen vaak geen oorzaak krijgen, is een bevinding over de classificatie voor AI-potjes; voor mensen (die wél geld laten liggen) blijft PB zinvol. Geen andere drempels aangepast.

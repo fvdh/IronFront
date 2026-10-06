@@ -515,3 +515,7 @@ Bekende beperkingen (bewust niet gedaan):
 - Flak Gunner 0,6 en Flak Hauler 1,0 tegen zwaar luchtpantser (`versusAir`; was 0,15/0,2). Scenario 7: beide houden de Thunderhead nu tegen. AI-meting onveranderd. Houden.
 - Allies hebben geen iteratie nodig: Rocket Troopers en Skyguard SAM houden de Thunderhead al tegen. **BL2 afgerond.**
 - **Open:** de patstellingen op Normal-medium (2/27, boven de doelgrens van 2%) blijven: de overgebleven speler heeft geen basis en geen luchtafweer meer. Dat is een vraag voor de regel voor nederlaag of het AI-gedrag (besluit opdrachtgever).
+
+### Onderzoek BL1 en correctie PB (2026-10-06)
+- **BL1 vervalt:** de AI bouwt op zeekaarten vrijwel geen schepen; Red Bloc verliest daar landgevechten. Op Coast/Islands zitten alle facties 70% van de tijd zonder geld (signaal voor fase 23). Zie `docs/metingen/2026-10-06-bl1-onderzoek.md`.
+- **PB gecorrigeerd** (akkoord opdrachtgever): alleen seconden met geld tellen. PB was voor AI-potjes volledig een artefact; X stijgt naar 23% (ijkset) en 37% (land). Zie `grenzen.md`, correctie onderaan. Alle runs herberekend.
