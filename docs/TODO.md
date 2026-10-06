@@ -510,3 +510,8 @@ Bekende beperkingen (bewust niet gedaan):
 ### BL2 iteratie 1: Psi-luchtafweer tegen zware luchtdoelen (branch `bl2-psi`)
 - Nieuw wapenveld `versusAir` (schadefactor alleen tegen vliegende doelen, `versusOf` in `combat.ts`). Spinner Tank en Gatling Cannon: 0,8 tegen zwaar luchtpantser (was 0,3/0,4).
 - Uitkomst: scenario 7 Psi van 0/2 naar 2/2 gehouden; grondgevecht en AI-winrates ongewijzigd binnen de intervallen. Houden. Hypothese en uitkomst: `docs/metingen/2026-10-06-bl2-psi-hypothese.md`.
+
+### BL2 iteratie 2: Red Bloc-luchtafweer (branch `bl2-redbloc`)
+- Flak Gunner 0,6 en Flak Hauler 1,0 tegen zwaar luchtpantser (`versusAir`; was 0,15/0,2). Scenario 7: beide houden de Thunderhead nu tegen. AI-meting onveranderd. Houden.
+- Allies hebben geen iteratie nodig: Rocket Troopers en Skyguard SAM houden de Thunderhead al tegen. **BL2 afgerond.**
+- **Open:** de patstellingen op Normal-medium (2/27, boven de doelgrens van 2%) blijven: de overgebleven speler heeft geen basis en geen luchtafweer meer. Dat is een vraag voor de regel voor nederlaag of het AI-gedrag (besluit opdrachtgever).
