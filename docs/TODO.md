@@ -502,3 +502,11 @@ Bekende beperkingen (bewust niet gedaan):
 - Referentiemeting `ref-26a`: opening identiek aan de nulmeting, verschillen klein en binnen de intervallen. Samenvatting: `docs/metingen/2026-10-06-ref-26a-samenvatting.md`.
 - Bevinding: patstellingen op Normal-medium 2/27 (doelgrens 2%), allebei een onneembare Thunderhead in een Red Bloc-spiegelpotje (ook de ene patstelling van de nulmeting). Hoort bij BL2.
 - Correctie: op land (small) telt bij 19 van 162 AI-spelers de tweede raffinaderij als uitbreiding; eerder stond in de documentatie dat geen AI uitbreidt.
+
+### Fun Pass, werkwijze zonder testers (2026-10-06)
+- Besluit opdrachtgever: er zijn voorlopig geen testers. Playtest-ronde 1 (fase 21) schuift naar later als validatie; potjes van de opdrachtgever tellen als aanwijzing. Verbeteringen starten op AI-data, één per iteratie, gemeten tegen `ref-26a`.
+- Voorbereid: `docs/metingen/2026-10-06-startvoorwaarden.md` (startbaar zonder mensdata: BL1, BL2, BL4) en `docs/ontwerp/roster.md` (fase 22.1, data ingevuld).
+
+### BL2 iteratie 1: Psi-luchtafweer tegen zware luchtdoelen (branch `bl2-psi`)
+- Nieuw wapenveld `versusAir` (schadefactor alleen tegen vliegende doelen, `versusOf` in `combat.ts`). Spinner Tank en Gatling Cannon: 0,8 tegen zwaar luchtpantser (was 0,3/0,4).
+- Uitkomst: scenario 7 Psi van 0/2 naar 2/2 gehouden; grondgevecht en AI-winrates ongewijzigd binnen de intervallen. Houden. Hypothese en uitkomst: `docs/metingen/2026-10-06-bl2-psi-hypothese.md`.

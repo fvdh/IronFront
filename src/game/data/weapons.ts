@@ -12,6 +12,7 @@ export interface WeaponDef {
   splash?: number; // area radius (tiles): enemies inside take damage with falloff
   ramp?: number; // gatling: cooldown shrinks 1 tick per consecutive shot down to this
   aa?: boolean; // can hit aircraft
+  versusAir?: Partial<Record<ArmorType, number>>; // overrides `versus` against flying targets (BL2: AA vs heavy aircraft)
   control?: boolean; // mind control instead of damage
   superweapon?: boolean; // fired by a superweapon (telemetry: cause of death)
   airOnly?: boolean; // anti-air only: ignores ground targets
@@ -50,12 +51,12 @@ export const WEAPONS: Record<string, WeaponDef> = {
   longbow: { damage: 170, range: 10, cooldown: 150, speed: 0.2, visual: 'rocket', color: '#ff9a50', versus: { none: 0.4, light: 1, heavy: 0.7, building: 1.4 }, sound: 'rocket', splash: 1.3 },
   psiBolt: { damage: 16, range: 4.2, cooldown: 24, speed: 0, visual: 'beam', color: '#d27bff', versus: { none: 1, light: 0.6, heavy: 0.25, building: 0.3 }, sound: 'zap' },
   smash: { damage: 85, range: 1.3, cooldown: 35, speed: 0, visual: 'tracer', color: '#ffe0c0', versus: { none: 1, light: 1, heavy: 0.8, building: 0.5 }, sound: 'cannon' },
-  gatling: { damage: 9, range: 5.5, cooldown: 14, speed: 0, visual: 'tracer', color: '#ffe890', versus: { none: 1.2, light: 0.8, heavy: 0.3, building: 0.3 }, aa: true, sound: 'gun', ramp: 5 },
+  gatling: { damage: 9, range: 5.5, cooldown: 14, speed: 0, visual: 'tracer', color: '#ffe890', versus: { none: 1.2, light: 0.8, heavy: 0.3, building: 0.3 }, aa: true, versusAir: { heavy: 0.8 }, sound: 'gun', ramp: 5 },
   magBeam: { damage: 70, range: 8, cooldown: 34, speed: 0, visual: 'beam', color: '#8a7bff', versus: { none: 0.2, light: 1, heavy: 1.3, building: 1.2 }, sound: 'zap' },
   pillboxMg: { damage: 18, range: 5.5, cooldown: 12, speed: 0, visual: 'tracer', color: '#fff0a0', versus: { none: 1.2, light: 0.6, heavy: 0.25, building: 0.2 }, aa: true, sound: 'gun' },
   refractorTower: { damage: 120, range: 8, cooldown: 80, speed: 0, visual: 'beam', color: '#9fe8ff', versus: { none: 1, light: 1, heavy: 1, building: 0.6 }, sound: 'zap', splash: 1 },
   coilBolt: { damage: 150, range: 7, cooldown: 70, speed: 0, visual: 'beam', color: '#7fc8ff', versus: { none: 1, light: 1, heavy: 1, building: 0.5 }, sound: 'zap' },
-  gatlingTower: { damage: 12, range: 6.5, cooldown: 14, speed: 0, visual: 'tracer', color: '#ffe890', versus: { none: 1.2, light: 0.9, heavy: 0.4, building: 0.3 }, aa: true, sound: 'gun', ramp: 4 },
+  gatlingTower: { damage: 12, range: 6.5, cooldown: 14, speed: 0, visual: 'tracer', color: '#ffe890', versus: { none: 1.2, light: 0.9, heavy: 0.4, building: 0.3 }, aa: true, versusAir: { heavy: 0.8 }, sound: 'gun', ramp: 4 },
   psiSpire: { damage: 70, range: 7, cooldown: 45, speed: 0, visual: 'beam', color: '#d27bff', versus: { none: 0.6, light: 1, heavy: 1.1, building: 0.5 }, sound: 'zap' },
   mindControl: { damage: 0, range: 5, cooldown: 75, speed: 0, visual: 'beam', color: '#f0a0ff', versus: { none: 1, light: 1, heavy: 1, building: 0 }, sound: 'zap', control: true },
   airMissile: { damage: 60, range: 5, cooldown: 45, speed: 0.6, visual: 'rocket', color: '#ffc080', versus: { none: 0.5, light: 1, heavy: 1, building: 0.7 }, sound: 'rocket', aa: true },
