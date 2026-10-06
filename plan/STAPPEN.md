@@ -46,7 +46,7 @@ Laatst bijgewerkt: 2026-10-02. Dit is het startpunt om het werk later weer op te
 
 ### Stap 3: twee sporen naast elkaar
 - [ ] **Spoor A:** fase 21, playtest-ronde 1, op build `playtest-r1` (1.3.0 met telemetrie, zonder AI-wijzigingen).
-- [ ] **Spoor B:** 26.A (AI-geheugen en exploit-fix) in een aparte branch, gevolgd door de referentiemeting `ref-26a`.
+- [x] **Spoor B:** 26.A (AI-geheugen en exploit-fix) in branch `fase-26a`, referentiemeting `ref-26a` gedraaid _(2026-10-06, `docs/metingen/2026-10-06-ref-26a-samenvatting.md`)_. Nog te mergen na `playtest-r1`.
 - [ ] Na ronde 1: de streefwaarden voor fase 27 invullen en bevriezen (beslissing 13).
 
 ### Stap 4: fase 22, ontwerpkern en schrapronde

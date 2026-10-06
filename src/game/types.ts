@@ -181,6 +181,17 @@ export interface AIState {
   waveSize?: number; // units the current wave started with
   lastPlace: number;
   difficulty?: Difficulty; // per-AI override (balance tests); default settings.difficulty
+  memory?: AIMemory; // 26.A; missing in old saves, then it starts empty
+  scouts?: number[]; // units checking old assumptions or searching for a lost enemy base (26.A)
+}
+
+/** What an AI knows from its own sight (plus public map info). Out of sight it is an assumption with an age. */
+export interface AIMemory {
+  buildings: { id: number; def: string; owner: number; x: number; y: number; seen: number }[]; // enemy buildings, last seen at tick `seen`
+  armies: { x: number; y: number; seen: number }[]; // where enemy units were last seen (merged within a few tiles)
+  fights: { x: number; y: number; t: number }[]; // where our own units/buildings were hit recently
+  checked: Record<string, number>; // search spots "x,y" → tick seen empty (or sent to)
+  ore: [number, number][]; // ore spots at the start of the game: public map knowledge
 }
 
 export type GameEvent =

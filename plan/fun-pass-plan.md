@@ -895,7 +895,7 @@ Het oude voorstel (Allied = expansion, Red Bloc = military, Psi = tech rush) is 
 | A4 | Splash gericht tegen klonten (= D2 uit fase 24) | Deathball wordt bestraft | Legerconcentratie | ↓ | Alleen als fase 24 het aantoont |
 
 ### Klaar als
-- [ ] **26.A:** geheugen en zoekvolgorde werken; exploit-test en eerlijkheidstest groen; nieuwe referentiemeting vastgelegd.
+- [x] **26.A:** geheugen en zoekvolgorde werken; exploit-test en eerlijkheidstest groen; nieuwe referentiemeting vastgelegd. _(2026-10-06, `docs/metingen/2026-10-06-ref-26a-samenvatting.md`)_
 - [ ] **26.B/C:** startvoorwaarde getoetst; bij start zijn intenties zichtbaar in telemetrie en komt elke intentie voor in de meetset.
 - [ ] Balans per niveau: Hard wint ≥ 60% van Normal, Normal ≥ 60% van Easy.
 - [ ] Factiebalans binnen 40–60% (winrate niet-spiegel, puntschatting, 20.2-G).
