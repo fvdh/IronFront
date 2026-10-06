@@ -76,14 +76,14 @@ Bij elke run staan de metrieken per potje (`.json`) en de ruwe telemetrie (`.raw
 | 23 | Velden zakken zelden < 25% | **Nee**: elk startveld zakt eronder, na ±3 min |
 | 23 | Inkomen na 15 min ≥ 80% van de piek zonder tweede veld | **Nee**: inkomen zakt; bovendien bereiken weinig potjes 15 min |
 | 23 | Winrate met en zonder tweede CY verschilt < 10 pp | **Onbeslist**: geen enkele AI breidt uit |
-| 23 | Harassment kost < 1 min inkomen | **Niet gemeten**: deze metriek ontbreekt nog in 20.2-F (zie open punten) |
+| 23 | Harassment kost < 1 min inkomen | **Ja** (achteraf gemeten, 2026-10-06): netto mediaan 0,14 min (land), 0,10 (zee), 0,34 (Normal-medium); maar 17–25% van de raids kost ≥ 1 min. Bruto (zonder correctie voor lege velden) is het 1,0–1,5 min |
 | 24 | Kernsignaal > 25% | **Onbeslist** (n = 1) |
 | 24 | Superwapens > 15% van de vernietigde waarde, of factiebalans met/zonder > 10 pp | **Nee**: 0–0,4%, en ≤ 1 potje verschil |
 | 24 | ≥ 40% beslissend gevecht na 15 min, of concentratie na 15 min ≥ 70% | **Nee** voor het gevecht (1%); concentratie 0,80 maar n = 2 (onbeslist) |
 
-## Verliesclassificatie: ijking (voorstel, nog niet bevroren)
+## Verliesclassificatie: ijking (bevroren 2026-10-06)
 
-Op `nul-normal-medium` (26 verloren AI-potjes) slaan **PB** (26/26) en **ES** (26/26) altijd aan. ES slaat ook aan bij elke waarde van het hoofdgetal: aan het eind valt de basis, en daarmee de raffinaderij. Voorstel in `grenzen.md`. Met dat voorstel:
+Op `nul-normal-medium` (26 verloren AI-potjes) slaan **PB** (26/26) en **ES** (26/26) altijd aan. ES slaat ook aan bij elke waarde van het hoofdgetal: aan het eind valt de basis, en daarmee de raffinaderij. De ijking staat bevroren in `grenzen.md` §3 en de rapporten zijn ermee herberekend. Resultaat:
 
 | | EU | ES | PB | SC | BG | SW | OV | VA | X (geen oorzaak) |
 |---|---|---|---|---|---|---|---|---|---|
@@ -94,7 +94,7 @@ EU, SW, OV en VA komen in AI-tegen-AI niet voor, bij geen enkele waarde. Dat is 
 
 ## Open punten en beperkingen
 
-1. **Definitie "eerste uitbreiding"** (20.2-C). Op eilandkaarten en kleine kaarten ligt de basis tussen twee velden, en telt de eerste raffinaderij al als uitbreiding (0,5 min op Islands). Voorstel in `grenzen.md`.
-2. **Harassment-kosten** (signaal fase 23) is nog geen metriek. Voorstel: inkomen van het slachtoffer in de 2 min na een aanval op zijn Haulers of raffinaderij, vergeleken met de 2 min ervoor.
-3. **Gratis Haulers** bij een raffinaderij tellen niet als "gebouwd", en **mind control** telt niet als kill (alleen statistiek per eenheid).
+1. ~~**Definitie "eerste uitbreiding"**~~ Opgelost (2026-10-06): startvelden zijn alle velden binnen 10 tegels (`grenzen.md` §4). Rapporten herberekend; geen enkele AI breidt uit, ook niet op zee. **PB op zee** slaat na de ijking in 36/36 verloren potjes aan: onderzoeken op overgevoeligheid (`grenzen.md` §3).
+2. ~~**Harassment-kosten**~~ Toegevoegd (2026-10-06, 20.2-F) en uit de ruwe telemetrie berekend; zie de tabel hierboven. Beperking: ook de eindaanval op een basis telt als raid als er nog 2 min resten.
+3. ~~**Gratis Haulers**~~ Nieuwe exports hebben een `spawned`-event (Haulers bij een raffinaderij, escorte-Thralls, Mutagen-Brutes) en een statistiek per speler met overnames. **Mind control** telt nog steeds niet als kill. De nulmeting zelf heeft deze events niet.
 4. **AI-potjes zijn te kort voor fase 24.** Wil je het kernsignaal toch uit AI-potjes halen, dan is een extra meetset nodig met langere potjes (bijv. medium/large, Normal). Dat is een besluit, geen bevinding.

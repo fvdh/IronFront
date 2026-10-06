@@ -10,13 +10,13 @@ export type Cause = 'EU' | 'ES' | 'PB' | 'SC' | 'BG' | 'SW' | 'OV' | 'VA';
 /** Tie order for causes that trigger at the same moment: structural causes first. */
 export const ORDER: Cause[] = ['EU', 'ES', 'PB', 'VA', 'SC', 'OV', 'SW', 'BG'];
 
-/** Main numbers per category ("hoofdgetal"), calibrated once on nul-normal-medium and then frozen. */
+/** Main numbers per category ("hoofdgetal"), calibrated once on nul-normal-medium and frozen 2026-10-06 (docs/metingen/grenzen.md §3). */
 export const VERLIES = {
   EU: { income: 1.5, minutes: 4 },
-  ES: { haulers: 0.5, incomeDrop: 0.4, beforeTurn: false }, // beforeTurn: only losses up to the turning point K (proposal, see docs/metingen/grenzen.md)
-  PB: { uptime: 0.5, unused: 3000, minutes: 3 },
+  ES: { haulers: 0.5, incomeDrop: 0.4, beforeTurn: true }, // beforeTurn: only losses up to the turning point K
+  PB: { uptime: 0.3, unused: 3000, minutes: 3 },
   SC: { share: 0.6, counter: 0.1 },
-  BG: { lost: 0.5 },
+  BG: { lost: 0.9 },
   SW: { share: 0.2 },
   OV: { share: 0.2 },
   VA: { before: 6, weaker: 0.5, endBefore: 12 },
@@ -66,7 +66,7 @@ export function classify(rec: MatchRecord, loser?: number): Classification | nul
     const inc0 = income2(m, L, d.t), inc1 = income2(m, L, d.t + 2 * MIN);
     if (hit && inc0 > 0 && inc1 <= (1 - VERLIES.ES.incomeDrop) * inc0) { set('ES', d.t); break; }
   }
-  // PB: production uptime < 50% or > $3000 unused for ≥ 3 min, with income ~even.
+  // PB: production uptime < 30% or > $3000 unused for ≥ 3 min, with income ~even.
   const S = [1, 2].map((c) => rec.telemetry.samples[L]?.[c] ?? '');
   const secs = Math.max(S[0].length, S[1].length), span = VERLIES.PB.minutes * 60;
   for (let i = span; i < secs; i++) {
@@ -93,7 +93,7 @@ export function classify(rec: MatchRecord, loser?: number): Classification | nul
       if (share < VERLIES.SC.counter) set('SC', K);
     }
   }
-  // BG: one fight costs ≥ 50% of the loser's army, armies ~even before, end within 5 min.
+  // BG: one fight costs ≥ 90% of the loser's army, armies ~even before, end within 5 min.
   for (const f of m.fights) {
     const a = army(L, f.start);
     if (a > 0 && (f.lost[L] ?? 0) >= VERLIES.BG.lost * a && even(ratioAt(f.start)) && m.T - f.end <= 5 * MIN) { set('BG', f.start); break; }

@@ -57,6 +57,7 @@ export function firePower(s: GameState, owner: number, id: number, x: number, y:
       emit(s, { type: 'mutated', owner, from: o.owner, def: o.def, cost: UNITS[o.def].cost });
       s.players[o.owner].stats.losses++;
       spawnUnit(s, 'brute', owner, o.x, o.y);
+      emit(s, { type: 'spawned', owner, def: 'brute', reason: 'mutagen' });
       s.effects.push({ kind: 'flash', x: o.x, y: o.y, x2: 0, y2: 0, t: 0, life: 12, color: '#9dff6a' });
     }
   if (pw === 'phasegate') phase(s, owner, x, y, x2, y2, r);

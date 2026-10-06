@@ -109,6 +109,7 @@ export interface PlayerStats {
   losses: number;
   stolen?: number; // credits taken from enemies (infiltration, Hover Disc drain)
   bonus?: number; // credits from crates
+  rig?: number; // credits from captured tech buildings (Fuel Rig); also counted in harvested
 }
 
 export interface Player {
@@ -186,6 +187,7 @@ export type GameEvent =
   | { type: 'fire'; x: number; y: number; weapon: string; owner: number }
   | { type: 'death'; x: number; y: number; kind: 'unit' | 'building'; owner: number; def: string; by?: number; killer?: string; cost?: number; cause?: DeathCause; age?: number } // killer: def of the unit/building that dealt it // by: player who dealt the blow; age in ticks
   | { type: 'unitReady'; owner: number; def: string }
+  | { type: 'spawned'; owner: number; def: string; reason: 'escort' | 'freeUnit' | 'mutagen' } // a unit nobody paid for
   | { type: 'buildingReady'; owner: number; def: string }
   | { type: 'placed'; owner: number; def: string; x?: number; y?: number } // building centre
   | { type: 'income'; owner: number; id: number; amount: number } // refinery id
@@ -263,6 +265,7 @@ export type DeathCause = 'weapon' | 'superweapon' | 'hero' | 'mc' | 'hazard' | '
 export interface Snapshot {
   t: number; p: number; credits: number;
   income: number; stolen: number; bonus: number; spent: number; // in the interval
+  rig?: number; // part of income from captured tech buildings, in the interval (missing in older exports)
   army: number; bld: number; // army value, building value (cost × health)
   inf: number; veh: number; air: number; sea: number; cy: number; harv: number; power: number; // counts (harv = harvesters); power = made − used
   fields: number[]; // ore left per field, % of tick 0
@@ -278,5 +281,5 @@ export interface Telemetry {
   ev: (GameEvent & { t: number })[];
   dec: [number, number, string, string, number?][]; // tick, owner, kind, detail, distance
   samples: string[][]; // per player, per queue (building, infantry, vehicle): one QueueState char per second
-  acc: { harvested: number; stolen: number; bonus: number; credits: number }[]; // running totals for the next snapshot
+  acc: { harvested: number; stolen: number; bonus: number; rig?: number; credits: number }[]; // running totals for the next snapshot
 }

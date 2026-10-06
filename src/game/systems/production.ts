@@ -298,6 +298,6 @@ export function buildUpTick(s: GameState, e: Entity) {
   if (free) {
     const [dx, dy] = dockOf(e);
     const spot = freeSpot(s, dx, dy, 6, false);
-    if (spot) spawnUnit(s, free, e.owner, spot[0], spot[1]);
+    if (spot) { spawnUnit(s, free, e.owner, spot[0], spot[1]); emit(s, { type: 'spawned', owner: e.owner, def: free, reason: 'freeUnit' }); }
   }
 }

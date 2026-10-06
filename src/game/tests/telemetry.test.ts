@@ -1,13 +1,14 @@
 // Fun Pass phase 20: the telemetry and the metrics on hand-built records (each metric fires, and does not fire),
 // plus the live checks: determinism with and without telemetry, saves, and a real match record.
 import { describe, expect, it } from 'vitest';
+import { spawnBuilding, spawnUnit } from '../core/entities';
 import { deserialize, serialize } from '../core/save';
 import { tick } from '../core/sim';
 import { createGame, DEFAULT_SETTINGS } from '../core/state';
 import { DIFFICULTY, TICK_RATE } from '../data/config';
 import { matchRecord, type MatchRecord } from '../systems/telemetry';
 import type { GameSettings, GameState, Snapshot } from '../types';
-import { choiceDensity, compare, firstMoments, matchMetrics, meaningful, phaseWindows, readMatch, report, wilson, type Run } from './meting';
+import { choiceDensity, compare, firstMoments, harassment, matchMetrics, meaningful, phaseWindows, readMatch, report, wilson, type Run } from './meting';
 import { classify, score } from './verlies';
 
 const S = TICK_RATE, M = 60 * TICK_RATE;
@@ -94,6 +95,10 @@ describe('Fun Pass metrics (20.2) on built telemetry', () => {
     expect(f.strategic).toBe(4);
     const g = firstMoments(readMatch(rec()), 0);
     expect([g.expansion, g.tech, g.ecoAttack, g.defense, g.factionMechanic, g.strategic]).toEqual([null, null, null, null, null, null]);
+    // a second field within 10 tiles of the start is a start field too (grenzen.md §4)
+    const r = rec({ ev: [{ t: M, type: 'placed', owner: 0, def: 'refinery', x: 12, y: 13 } as Ev] });
+    r.telemetry.fieldPos.push([12, 12]); r.telemetry.fieldOre.push(1000);
+    expect(firstMoments(readMatch(r), 0).expansion).toBeNull();
   });
 
   it('counter-production: ordering the counter of what the enemy mostly fields', () => {
@@ -140,6 +145,22 @@ describe('Fun Pass metrics (20.2) on built telemetry', () => {
     const mm = matchMetrics(rec({ ev: [{ t: 10, type: 'unitReady', owner: 0, def: 'rifle' } as Ev, { t: 20, type: 'unitReady', owner: 0, def: 'rifle' } as Ev, death(40 * S, 0, 'rifle', { age: 30 * S, killer: 'rifle', cost: 100 })] }));
     expect(mm.units.rifle).toMatchObject({ built: 2, died: 1, diedYoung: 1 });
     expect(mm.units.rifle).toMatchObject({ kills: 1, killValue: 100 });
+    // per player: a unit taken by mind control kills for its new owner
+    const mc = matchMetrics(rec({ ev: [{ t: 10, type: 'unitReady', owner: 1, def: 'heavy' } as Ev, { t: 20, type: 'mindControl', owner: 0, from: 1, def: 'heavy' } as Ev, death(40 * S, 1, 'rifle', { by: 0, killer: 'heavy', cost: 200 })] }));
+    expect(mc.unitsByPlayer[0].heavy).toMatchObject({ built: 0, taken: 1, kills: 1, killValue: 200 });
+    expect(mc.unitsByPlayer[1].heavy).toMatchObject({ built: 1, lost: 1, kills: 0 });
+    const fr = matchMetrics(rec({ ev: [{ t: 10, type: 'spawned', owner: 1, def: 'miner', reason: 'freeUnit' } as Ev] }));
+    expect(fr.unitsByPlayer[1].miner).toMatchObject({ built: 0, free: 1 });
+  });
+
+  it('harassment: income lost after a raid on the economy, in minutes of income', () => {
+    const raid = (t: number) => ({ t, type: 'underAttack', owner: 1, def: 'miner', x: 40, y: 40, by: 0 }) as Ev;
+    const r = rec({ ev: [raid(10 * M), raid(11 * M), raid(19 * M)], snaps: (t, p) => (p === 1 && t > 10 * M ? { income: 50 } : {}) });
+    expect(harassment(readMatch(r), 1)).toEqual([{ raw: 1.5, net: 1.5 }]); // 2400 → 600 in 2 min = 1.5 min of income; 11 min is the same raid, 19 min has no 2 min left
+    expect(harassment(readMatch(rec({ ev: [raid(10 * M)] })), 1)).toEqual([{ raw: 0, net: 0 }]);
+    const dry = rec({ ev: [raid(10 * M)], snaps: (t) => (t > 10 * M ? { income: 50 } : {}) }); // both lose income: the fields, not the raid
+    expect(harassment(readMatch(dry), 1)).toEqual([{ raw: 1.5, net: 0 }]);
+    expect(harassment(readMatch(r), 0)).toEqual([]);
   });
 
   it('faction balance interval (Wilson)', () => {
@@ -178,8 +199,9 @@ describe('loss classification', () => {
     expect(lose({ ev: air }).causes.SC).toBeDefined();
     expect(lose({ ev: air, snaps: (_t, p) => (p === 1 ? { byDef: { flakgunner: 1500, tank_soviets: 1500 } } : {}) }).causes.SC).toBeUndefined();
   });
-  it('BG: one even fight costs half the army, over within 5 min', () => {
-    const fight = [0, 1, 2].map((k) => death(18 * M + k * 5 * S, 1, 'tank_soviets', { cost: 600 }));
+  it('BG: one even fight costs ≥ 90% of the army, over within 5 min', () => {
+    const fight = [0, 1, 2, 3, 4].map((k) => death(18 * M + k * 5 * S, 1, 'tank_soviets', { cost: 600 })); // 3000 of 3000
+    expect(lose({ ev: fight.slice(0, 4) }).causes.BG).toBeUndefined(); // 80%
     expect(lose({ ev: fight }).causes.BG).toBe(18 * M);
     expect(lose({ ev: fight.slice(0, 1) }).causes.BG).toBeUndefined();
   });
@@ -200,7 +222,7 @@ describe('loss classification', () => {
     expect(lose({ T: 20 * M, ev: raid, snaps: (_t, p) => ({ army: p === 0 ? 3000 : 1000 }) }).causes.VA).toBeUndefined();
   });
   it('main cause = earliest; nothing found = X; scores 2/1/0', () => {
-    const c = lose({ ev: [{ t: 15 * M, type: 'mindControl', owner: 0, from: 1, def: 'tank_soviets' } as Ev, ...[0, 1, 2].map((k) => death(18 * M + k * 5 * S, 1, 'tank_soviets', { cost: 600 }))] });
+    const c = lose({ ev: [{ t: 15 * M, type: 'mindControl', owner: 0, from: 1, def: 'tank_soviets' } as Ev, ...[0, 1, 2, 3, 4].map((k) => death(18 * M + k * 5 * S, 1, 'tank_soviets', { cost: 600 }))] });
     expect(c.main).toBe('OV');
     expect(score(c, ['OV'])).toBe(2);
     expect(score(c, ['BG'])).toBe(1);
@@ -251,6 +273,18 @@ describe('telemetry is read-only (20.6 Klaar als)', () => {
     expect(() => classify(r)).not.toThrow();
     expect(() => report({ label: 'x', date: 'x', settings: {}, matches: [mm] })).not.toThrow();
   }, 120_000);
+
+  it('rig income and free units are recorded', () => {
+    const s = createGame({ ...DEFAULT_SETTINGS, aiCount: 0 } as GameSettings);
+    spawnBuilding(s, 'techrig', 0, 20, 20);
+    spawnUnit(s, 'thrallhauler', 0, 10, 10);
+    spawnBuilding(s, 'refinery', 0, 14, 4, 0);
+    run(s, 20 * S);
+    const ev = s.telemetry!.ev.filter((e) => e.type === 'spawned');
+    expect(ev.filter((e) => 'reason' in e && e.reason === 'escort')).toHaveLength(3);
+    expect(ev.some((e) => 'reason' in e && e.reason === 'freeUnit')).toBe(true);
+    expect(s.telemetry!.snaps.filter((x) => x.p === 0).reduce((a, x) => a + (x.rig ?? 0), 0)).toBeGreaterThan(0);
+  });
 
   it('oreRules v14 does not exist before phase 23', () => {
     const s = createGame({ ...DEFAULT_SETTINGS, oreRules: 'v14' });

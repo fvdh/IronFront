@@ -375,7 +375,7 @@ export function buildingTick(s: GameState, e: Entity) {
 /** Captured tech buildings: income, or healing for the owner's infantry / vehicles everywhere (once a second). */
 function techTick(s: GameState, e: Entity, d: (typeof BUILDINGS)[string]) {
   const p = s.players[e.owner];
-  if (d.income) { p.credits += d.income; p.stats.harvested += d.income; }
+  if (d.income) { p.credits += d.income; p.stats.harvested += d.income; p.stats.rig = (p.stats.rig ?? 0) + d.income; }
   if (d.heals)
     for (const u of s.entities)
       if (u.owner === e.owner && u.kind === 'unit' && u.hp > 0 && UNITS[u.def].category === d.heals) u.hp = Math.min(UNITS[u.def].hp, u.hp + UNITS[u.def].hp * 0.02);

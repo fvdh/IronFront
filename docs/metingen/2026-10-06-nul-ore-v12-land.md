@@ -108,6 +108,9 @@ Overwinst: draai dezelfde run met `BALANCE_NOSW=1` en geef hem mee met `BALANCE_
 | Velden met eigen raffinaderij (ooit) | 1 (1–1), n=162 | 1 (1–1), n=54 | 1 (1–1), n=54 | 1 (1–1), n=54 |
 | Startveld < 25% (min) | 3.17 (2.83–4.17), n=162 | 3.17 (2.83–4.17), n=54 | 3.17 (2.83–3.96), n=54 | 3.33 (3.00–4.33), n=54 |
 | Tweede CY (min) | – | – | – | – |
+| Inkomen uit Fuel Rigs ($, heel potje) | – | – | – | – |
+| Harassment: kosten per raid (min inkomen) | 1.41 (0.92–1.70), n=90 | 1.35 (0.90–1.70), n=25 | 1.41 (1.06–1.71), n=33 | 1.47 (0.77–1.72), n=32 |
+| Harassment netto (min inkomen, min daling aanvaller) | 0.14 (-0.20–0.65), n=90 | 0.38 (-0.12–0.62), n=25 | 0.14 (-0.14–0.62), n=33 | 0.03 (-0.31–0.79), n=32 |
 
 | Metriek | Waarde |
 | --- | --- |
@@ -115,6 +118,7 @@ Overwinst: draai dezelfde run met `BALANCE_NOSW=1` en geef hem mee met `BALANCE_
 | Speler met een tweede CY | 0/162 (0%) |
 | Winst met tweede CY | – |
 | Winst zonder tweede CY | 81/162 (50%) |
+| Raids op de economie die ≥ 1 min inkomen kosten, netto (signaal fase 23) | 20/118 (17%) |
 | Patstellingen | 0/81 (0%) |
 
 ## G. Gebruik en balans
@@ -167,18 +171,18 @@ Zetelbias (spiegelpotjes): speler 0 wint 11 van 27.
 | Grom (`grom`) | 2 | 1 | 0.28 | 100% |
 | Nova (`nova`) | 1 | 5 | 4.07 | 100% |
 
-## Verliesoorzaken (plan/fun-pass-verliesclassificatie.md, nog niet geijkt)
+## Verliesoorzaken (plan/fun-pass-verliesclassificatie.md, geijkt: docs/metingen/grenzen.md §3)
 
 | Code | Hoofdoorzaak | Geldige oorzaak |
 | --- | ---: | ---: |
 | EU | 0/81 | 0/81 |
-| ES | 2/81 | 80/81 |
-| PB | 78/81 | 78/81 |
+| ES | 13/81 | 20/81 |
+| PB | 41/81 | 44/81 |
 | SC | 0/81 | 3/81 |
-| BG | 1/81 | 45/81 |
+| BG | 14/81 | 39/81 |
 | SW | 0/81 | 0/81 |
 | OV | 0/81 | 0/81 |
 | VA | 0/81 | 0/81 |
-| X | 0/81 | – |
+| X | 13/81 | – |
 
 Kosteneffectiviteit per unit zonder micro en terrein: duelmatrix `DUELS=1 npx vitest run duels` (`docs/balans/`).

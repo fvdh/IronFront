@@ -15,16 +15,21 @@ Status: **concept** (2026-10-02). Hoort bij `plan/fun-pass-plan.md` (fase 21). V
 - **Moment van aanslaan:** het tijdstip waarop het criterium voor het eerst volledig waar is. Bij een duur-eis (bijv. ≥ 4 min) is dat het **einde** van die duur. Bij een gebeurtenis (gevecht, schot, verlies van een raffinaderij) is het het tijdstip van die gebeurtenis. Bij VA is het de eerste vijandelijke aanval in de basis.
 - **Fases van een potje, productie-uptime, counterrol:** definities in 20.0 en 20.2 van het plan.
 - **IJking.** De drempels worden één keer geijkt op `nul-normal-medium` (20.6), vóór tester 1, en daarna bevroren. Methode: per categorie wordt alleen het hoofdgetal (bijv. 1,5× bij EU) zo gezet dat de categorie aanslaat in 10–60% van de verloren AI-potjes. Ligt de waarde hieronder al in die band, dan blijft ze staan. Elke aanpassing staat met oude en nieuwe waarde in dit bestand.
+- **IJking gedaan** (2026-10-06, bevroren in `docs/metingen/grenzen.md` §3). De band 10–60% is daar vervangen door een richtwaarde: een oorzaak die in > 60% van de verliezen aanslaat, wordt onderzocht op overgevoeligheid; een lage score wordt niet opgerekt.
+  - PB: productie-uptime < 50% → **< 30%**.
+  - BG: verlies in één gevecht ≥ 50% → **≥ 90%**.
+  - ES: getal blijft 40%; **regelwijziging**: alleen verliezen tot het kantelpunt K tellen.
+  - EU, SC, SW, OV, VA: ongewijzigd.
 
 ## Categorieën
 
 | Code | Oorzaak | Telemetrie-criterium | Correct (voorbeeld) | Onjuist (voorbeeld) |
 |---|---|---|---|---|
 | **EU** | Economie: niet uitgebreid | Inkomen tegenstander ≥ 1,5× gedurende ≥ 4 min vóór K; verliezer 0 extra velden en 0 extra CY; legerwaarde aan het begin van die 4 min ~gelijk | "Hij had meer geld omdat ik niet uitbreidde." "Mijn veld was leeg." | "Hij had betere tanks." "Hij was sneller." |
-| **ES** | Economie: verstoord | Verliezer verliest ≥ 50% van zijn Haulers of een raffinaderij, en zijn inkomen daalt ≥ 40% binnen 2 min | "Ze schoten mijn harvesters kapot." "Mijn raffinaderij ging neer." | "Ik had te weinig geld" (zonder oorzaak: symptoom) |
-| **PB** | Geld niet besteed | Productie-uptime (20.2-B) < 50% of ongebruikt geld > 3.000 gedurende ≥ 3 min; inkomen ~gelijk | "Ik bouwde te weinig." "Ik had geld over en deed er niks mee." | "Hij had meer geld." |
+| **ES** | Economie: verstoord | Verliezer verliest vóór K ≥ 50% van zijn Haulers of een raffinaderij, en zijn inkomen daalt ≥ 40% binnen 2 min | "Ze schoten mijn harvesters kapot." "Mijn raffinaderij ging neer." | "Ik had te weinig geld" (zonder oorzaak: symptoom) |
+| **PB** | Geld niet besteed | Productie-uptime (20.2-B) < 30% of ongebruikt geld > 3.000 gedurende ≥ 3 min; inkomen ~gelijk | "Ik bouwde te weinig." "Ik had geld over en deed er niks mee." | "Hij had meer geld." |
 | **SC** | Verkeerde samenstelling | ≥ 60% van de verloren waarde door één klasse (bijv. lucht), terwijl de verliezer < 10% legerwaarde had met de counterrol van die klasse (20.2) | "Ik had geen luchtafweer." "Zijn tanks waren te sterk voor mijn infanterie." | "Hij had gewoon meer." |
-| **BG** | Beslissend gevecht | Eén gevecht kost de verliezer ≥ 50% van zijn legerwaarde, legerwaarde vooraf ~gelijk, einde binnen 5 min | "Ik verloor alles in dat ene gevecht bij de brug." "Ik viel aan op een slechte plek." | "Hij had betere tanks" (alleen correct als ook SC aanslaat) |
+| **BG** | Beslissend gevecht | Eén gevecht kost de verliezer ≥ 90% van zijn legerwaarde, legerwaarde vooraf ~gelijk, einde binnen 5 min | "Ik verloor alles in dat ene gevecht bij de brug." "Ik viel aan op een slechte plek." | "Hij had betere tanks" (alleen correct als ook SC aanslaat) |
 | **SW** | Superwapen | Superwapens ≥ 20% van de verloren waarde, of een CY/fabriek vernietigd door een schot binnen 3 min vóór K | "Zijn nuke haalde mijn fabriek weg." | "Hij was gewoon sterker." |
 | **OV** | Overname | Mind control, engineers, Dominion of Mutagen (event `mutated`) ≥ 20% van de verloren waarde | "Hij nam mijn tanks over." | "Mijn tanks gingen dood." |
 | **VA** | Vroege druk | Eerste vijandelijke aanval in de basis vóór 6 min; legerwaarde verliezer < 0,5× bij eerste contact; einde vóór 12 min | "Hij viel aan voor ik iets had." | "Ik verloor de lategame." |

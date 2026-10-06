@@ -273,6 +273,13 @@ function nearestField(m: Match, x: number, y: number): number {
   return best;
 }
 export const startField = (m: Match, p: number) => { const pl = m.rec.players.find((q) => q.id === p)!; return nearestField(m, pl.startX, pl.startY); };
+/** Start fields (frozen, docs/metingen/grenzen.md §4): every field whose centre lies within this many tiles of the start. */
+export const START_FIELD_RADIUS = 10;
+export function startFields(m: Match, p: number): Set<number> {
+  const pl = m.rec.players.find((q) => q.id === p)!, out = new Set<number>([startField(m, p)]);
+  m.rec.telemetry.fieldPos.forEach(([fx, fy], k) => { if (Math.hypot(fx - pl.startX, fy - pl.startY) <= START_FIELD_RADIUS) out.add(k); });
+  return out;
+}
 
 /** Faction mechanics (frozen with the plan, 20.2-C): the first event that shows the faction's own trick. */
 export const FACTION_MECHANICS: Record<string, (e: Ev, p: number) => boolean> = {
@@ -282,9 +289,10 @@ export const FACTION_MECHANICS: Record<string, (e: Ev, p: number) => boolean> = 
 };
 
 export function firstMoments(m: Match, p: number): FirstMoments {
-  const sf = startField(m, p), faction = m.rec.players.find((q) => q.id === p)!.faction;
+  const sf = startFields(m, p), faction = m.rec.players.find((q) => q.id === p)!.faction;
   const firstT = (f: (e: Ev) => boolean) => m.ev.find(f)?.t ?? null;
-  const expansion = firstT((e) => (e.type === 'placed' || e.type === 'deployed') && e.owner === p && (e.def === 'refinery' || e.def === 'cy') && e.x !== undefined && nearestField(m, e.x, e.y!) !== sf);
+  // expansion: first finished refinery or deployed CY whose nearest field is not a start field
+  const expansion = firstT((e) => (e.type === 'placed' || e.type === 'deployed') && e.owner === p && (e.def === 'refinery' || e.def === 'cy') && e.x !== undefined && !sf.has(nearestField(m, e.x, e.y!)));
   const tech = firstT((e) => (e.type === 'enqueued' && e.owner === p && isTech(e.def)) || (e.type === 'captured' && e.owner === p && !!BUILDINGS[e.def]?.neutralOnly && !BUILDINGS[e.def].garrison && !BUILDINGS[e.def].bridge));
   const ecoAttack = firstT((e) => (e.type === 'underAttack' || e.type === 'death') && e.by === p && e.owner !== p && (e.def === 'refinery' || !!UNITS[e.def]?.harvester));
   // first defensive reaction
@@ -357,6 +365,8 @@ export interface PlayerMetrics {
   conc: Record<Phase, number | null>;
   incomePerMin: number[]; spentPerMin: number[];
   fieldsWithRefinery: number; secondCy: number | null; startFieldLow: number | null;
+  rigIncome: number | null; // credits from captured Fuel Rigs (null: export before the field existed)
+  harass: { raw: number; net: number }[]; // per raid on this player's economy: income lost in minutes of income; net = minus the attacker's own drop (see harassment())
 }
 export interface MatchMetrics {
   seed: number; map: string; size: string; build: string; aiVersion: number; superweapons: boolean; oreRules: string;
@@ -370,7 +380,31 @@ export interface MatchMetrics {
   totalRatio: (number | null)[]; // per minute: total value (army + buildings + credits) p0 : p1 (control for the superweapon over-win)
   players: PlayerMetrics[];
   loss?: { main: string; causes: string[] } | null; // loss classification (verlies.ts), filled in by the run
-  units: Record<string, { built: number; died: number; diedYoung: number; kills: number; killValue: number; ownValue: number }>;
+  units: Record<string, UnitStat>; // all players together, per unit type
+  unitsByPlayer: Record<number, Record<string, UnitStat & { taken: number; lost: number; free: number }>>; // per player; taken = gained by takeover, lost = taken from him, free = spawned without paying
+}
+export interface UnitStat { built: number; died: number; diedYoung: number; kills: number; killValue: number; ownValue: number }
+
+/** Harassment cost (signal phase 23): per raid on p's Haulers or refinery, the drop in p's income over the 2 min
+ *  after the raid versus the 2 min before, in minutes of income. A new raid starts ≥ 2 min after the previous one;
+ *  raids without a full 2 min after them (end of the game) do not count.
+ *  net: minus the attacker's drop over the same window, because income falls anyway once the fields run dry.
+ *  ponytail: the final assault on a base counts as a raid too when there are 2 min left; filter on K if that skews it. */
+export function harassment(m: Match, p: number): { raw: number; net: number }[] {
+  const out: { raw: number; net: number }[] = [];
+  const drop = (q: number, t: number) => { const b = income2(m, q, t); return b > 0 ? Math.max(0, b - income2(m, q, t + 2 * MIN)) / (b / 2) : 0; };
+  let last = -Infinity;
+  for (const e of m.ev) {
+    if ((e.type !== 'underAttack' && e.type !== 'death') || e.owner !== p || e.by === undefined || e.by === p || !m.players.includes(e.by)) continue;
+    if (e.def !== 'refinery' && !UNITS[e.def]?.harvester) continue;
+    if (e.t - last < 2 * MIN) continue;
+    last = e.t;
+    const before = income2(m, p, e.t);
+    if (e.t + 2 * MIN > m.T || before <= 0) continue;
+    const raw = drop(p, e.t);
+    out.push({ raw, net: raw - drop(e.by, e.t) });
+  }
+  return out;
 }
 
 export function playerMetrics(m: Match, p: number): PlayerMetrics {
@@ -389,6 +423,8 @@ export function playerMetrics(m: Match, p: number): PlayerMetrics {
     first: firstMoments(m, p), choice: choiceDensity(m, p), conc,
     incomePerMin: perMin((s) => s.income + s.stolen + s.bonus), spentPerMin: perMin((s) => s.spent),
     fieldsWithRefinery: fields.size, secondCy: cy2 ? min(cy2.t) : null, startFieldLow: low ? min(low.t) : null,
+    rigIncome: ss.some((s) => s.rig !== undefined) ? ss.reduce((a, s) => a + (s.rig ?? 0), 0) : null,
+    harass: harassment(m, p),
   };
 }
 
@@ -418,13 +454,24 @@ export function matchMetrics(rec: MatchRecord): MatchMetrics {
   const first = (m.snaps.get(p0) ?? []);
   const fieldLow = rec.telemetry.fieldOre.map((_, k) => { const s = first.find((x) => x.fields[k] < 25); return s ? min(s.t) : null; });
   // per unit (20.2-G)
-  const units: MatchMetrics['units'] = {};
-  const u = (d: string) => (units[d] ??= { built: 0, died: 0, diedYoung: 0, kills: 0, killValue: 0, ownValue: 0 });
+  const units: MatchMetrics['units'] = {}, unitsByPlayer: MatchMetrics['unitsByPlayer'] = {};
+  const stat = (): UnitStat => ({ built: 0, died: 0, diedYoung: 0, kills: 0, killValue: 0, ownValue: 0 });
+  const zero = () => ({ ...stat(), taken: 0, lost: 0, free: 0 });
+  // both the type total and the player's own row; a unit that changed owner counts for its owner at that moment
+  const u = (d: string, p: number | undefined, f: (x: UnitStat) => void) => {
+    f((units[d] ??= stat()));
+    if (p !== undefined && m.players.includes(p)) f(((unitsByPlayer[p] ??= {})[d] ??= zero()));
+  };
   for (const e of m.ev) {
-    if (e.type === 'unitReady' && UNITS[e.def] && m.players.includes(e.owner)) { u(e.def).built++; u(e.def).ownValue += UNITS[e.def].cost; }
+    if (e.type === 'unitReady' && UNITS[e.def] && m.players.includes(e.owner)) u(e.def, e.owner, (x) => { x.built++; x.ownValue += UNITS[e.def].cost; });
+    if (e.type === 'spawned' && m.players.includes(e.owner)) ((unitsByPlayer[e.owner] ??= {})[e.def] ??= zero()).free++;
+    if ((e.type === 'mindControl' || e.type === 'mutated' || e.type === 'captured') && UNITS[e.def] && m.players.includes(e.owner)) {
+      const p = (unitsByPlayer[e.owner] ??= {}); (p[e.def] ??= zero()).taken++;
+      if (m.players.includes(e.from)) ((unitsByPlayer[e.from] ??= {})[e.def] ??= zero()).lost++;
+    }
     if (e.type === 'death') {
-      if (e.kind === 'unit' && UNITS[e.def] && m.players.includes(e.owner)) { u(e.def).died++; if ((e.age ?? 1e9) < MIN) u(e.def).diedYoung++; }
-      if (e.killer && UNITS[e.killer] && e.by !== e.owner) { u(e.killer).kills++; u(e.killer).killValue += e.cost ?? 0; }
+      if (e.kind === 'unit' && UNITS[e.def] && m.players.includes(e.owner)) u(e.def, e.owner, (x) => { x.died++; if ((e.age ?? 1e9) < MIN) x.diedYoung++; });
+      if (e.killer && UNITS[e.killer] && e.by !== e.owner) u(e.killer, e.by, (x) => { x.kills++; x.killValue += e.cost ?? 0; });
     }
   }
   return {
@@ -436,7 +483,7 @@ export function matchMetrics(rec: MatchRecord): MatchMetrics {
     leads, superweapon: superweapon(m), snowball10, comeback,
     decisive: { any: decisiveFights.length > 0, after15: decisiveFights.some((f) => f.start >= 15 * MIN) },
     fieldLow, totalRatio: Array.from({ length: Math.floor(m.T / MIN) + 1 }, (_, k) => { const a = snapAt(m, p0, k * MIN), b = snapAt(m, p1, k * MIN); return a && b ? ratio(a.army + a.bld + a.credits, b.army + b.bld + b.credits) : null; }),
-    players: m.players.map((p) => playerMetrics(m, p)), units,
+    players: m.players.map((p) => playerMetrics(m, p)), units, unitsByPlayer,
   };
 }
 
@@ -544,6 +591,9 @@ export function report(run: Run, control?: Run): string {
   row('Velden met eigen raffinaderij (ooit)', ...byF((p) => p.fieldsWithRefinery, 0));
   row('Startveld < 25% (min)', ...byF((p) => p.startFieldLow));
   row('Tweede CY (min)', ...byF((p) => p.secondCy));
+  row('Inkomen uit Fuel Rigs ($, heel potje)', ...byF((p) => p.rigIncome, 0));
+  row('Harassment: kosten per raid (min inkomen)', ...byF((p) => median(p.harass.map((x) => x.raw))));
+  row('Harassment netto (min inkomen, min daling aanvaller)', ...byF((p) => median(p.harass.map((x) => x.net))));
   L.push('');
   row('Metriek', 'Waarde'); row('---', '---');
   row('Startveld ooit < 25%', share(ps.map(({ p }) => p.startFieldLow !== null)));
@@ -551,6 +601,8 @@ export function report(run: Run, control?: Run): string {
   const exp = ps.filter(({ m }) => !m.stalemate);
   row('Winst met tweede CY', share(exp.filter(({ p }) => p.secondCy !== null).map(({ p }) => p.won)));
   row('Winst zonder tweede CY', share(exp.filter(({ p }) => p.secondCy === null).map(({ p }) => p.won)));
+  const raids = ps.flatMap(({ p }) => p.harass);
+  row('Raids op de economie die ≥ 1 min inkomen kosten, netto (signaal fase 23)', share(raids.map((x) => x.net >= 1)));
   row('Patstellingen', share(ms.map((m) => m.stalemate)));
   L.push('');
 
@@ -567,14 +619,14 @@ export function report(run: Run, control?: Run): string {
   }
   const mirror = ms.filter((m) => m.factions[0] === m.factions[1] && !m.stalemate);
   L.push('', `Zetelbias (spiegelpotjes): speler 0 wint ${mirror.filter((m) => m.winner === 0).length} van ${mirror.length}.`, '');
-  const U: Record<string, MatchMetrics['units'][string]> = {};
+  const U: Record<string, UnitStat> = {};
   for (const m of ms) for (const [d, x] of Object.entries(m.units)) { const t = (U[d] ??= { built: 0, died: 0, diedYoung: 0, kills: 0, killValue: 0, ownValue: 0 }); for (const k of Object.keys(x) as (keyof typeof x)[]) t[k] += x[k]; }
   row('Eenheid', 'Gebouwd', 'Kills', 'Kosten-efficiëntie', '% overleeft ≥ 60 s'); row('---', '---:', '---:', '---:', '---:');
   for (const [d, x] of Object.entries(U).filter(([, x]) => x.built).sort((a, b) => b[1].built - a[1].built))
     row(`${UNITS[d]?.name ?? d} (\`${d}\`)`, String(x.built), String(x.kills), f2(x.ownValue ? x.killValue / x.ownValue : null), pct(1 - x.diedYoung / x.built));
   const losses = ms.map((m) => m.loss).filter((x): x is NonNullable<typeof x> => !!x);
   if (losses.length) {
-    L.push('', '## Verliesoorzaken (plan/fun-pass-verliesclassificatie.md, nog niet geijkt)', '');
+    L.push('', '## Verliesoorzaken (plan/fun-pass-verliesclassificatie.md, geijkt: docs/metingen/grenzen.md §3)', '');
     row('Code', 'Hoofdoorzaak', 'Geldige oorzaak'); row('---', '---:', '---:');
     for (const c of ['EU', 'ES', 'PB', 'SC', 'BG', 'SW', 'OV', 'VA', 'X']) row(c, `${losses.filter((x) => x.main === c).length}/${losses.length}`, c === 'X' ? '–' : `${losses.filter((x) => x.causes.includes(c)).length}/${losses.length}`);
   }

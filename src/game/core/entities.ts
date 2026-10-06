@@ -2,6 +2,7 @@ import { BUILDINGS } from '../data/buildings';
 import { SCAN_INTERVAL } from '../data/config';
 import { UNITS } from '../data/units';
 import type { Entity, GameState } from '../types';
+import { emit } from './events';
 import { idx, terrainPassable, type MoveKind } from '../world/map';
 
 function create(s: GameState, def: string, owner: number, kind: Entity['kind'], x: number, y: number, hp: number): Entity {
@@ -31,6 +32,7 @@ export function spawnUnit(s: GameState, def: string, owner: number, x: number, y
     const [ex, ey] = freeSpot(s, x + Math.cos(k * 2.1), y + Math.sin(k * 2.1), 4) ?? [x, y];
     const t = spawnUnit(s, d.escort[0], owner, ex, ey);
     t.master = e.id;
+    emit(s, { type: 'spawned', owner, def: t.def, reason: 'escort' });
   }
   return e;
 }

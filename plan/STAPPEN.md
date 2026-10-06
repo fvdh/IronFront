@@ -38,7 +38,8 @@ Laatst bijgewerkt: 2026-10-02. Dit is het startpunt om het werk later weer op te
 ### Stap 2: Fun Pass fase 20, meetinstrumenten en nulmeting
 - [x] Telemetrie, kruising factie × kaart in de balanstool, zeematrix, tijdlijnweergave en classificatiescript bouwen. _(2026-10-02)_
 - [x] Nulmeting op 1.3.0 gedraaid _(2026-10-06)_.
-- [ ] Alarm- en doelgrenzen bevriezen: voorstel in `docs/metingen/grenzen.md`, wacht op akkoord.
+- [x] Alarm- en doelgrenzen bevroren in `docs/metingen/grenzen.md` _(2026-10-06)_, inclusief ijking verliesclassificatie en definitie uitbreiding; rapporten herberekend.
+- [x] Telemetrie aangevuld vóór `playtest-r1`: rig-inkomen, gratis eenheden, harassment-kosten _(2026-10-06)_.
 - [ ] **Parallel:**
   - testers en beoordelaars werven (beslissing 11);
   - akkoord geven op de definitie van "leuk", de fun-audit en de verliesclassificatie, en die bevriezen (beslissing 12).
@@ -65,4 +66,4 @@ Laatst bijgewerkt: 2026-10-02. Dit is het startpunt om het werk later weer op te
 
 ## Waar we nu staan
 
-Stap 0 is klaar. Van stap 2 zijn de meetinstrumenten van fase 20 gebouwd (zie `docs/TODO.md`). Stap 1 is klaar: 1.3.0 is uit (2026-10-06). De nulmeting is gedraaid (`docs/metingen/2026-10-06-nulmeting-samenvatting.md`). Volgende: akkoord op `docs/metingen/grenzen.md`, dan stap 3 (playtest-ronde 1 en 26.A).
+Stap 0 is klaar. Van stap 2 zijn de meetinstrumenten van fase 20 gebouwd (zie `docs/TODO.md`). Stap 1 is klaar: 1.3.0 is uit (2026-10-06). De nulmeting is gedraaid (`docs/metingen/2026-10-06-nulmeting-samenvatting.md`). De grenzen zijn bevroren (`docs/metingen/grenzen.md`). Volgende: stap 3 (playtest-ronde 1 en 26.A).

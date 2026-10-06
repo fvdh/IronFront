@@ -480,4 +480,18 @@ Bekende beperkingen (bewust niet gedaan):
 - Het buildlabel was eerst instabiel: macOS `.DS_Store`-bestanden zaten in de hash. Die worden nu overgeslagen, en testruns krijgen geen `-dev` meer.
 - `nulmeting.sh` bewaart nu ook de ruwe telemetrie.
 
-**Open in fase 20:** akkoord op `docs/metingen/grenzen.md` (grenzen, ijking verliesclassificatie, definitie uitbreiding), daarna bevriezen.
+**Grenzen bevroren** (2026-10-06): `docs/metingen/grenzen.md`.
+- Doel- en alarmgrenzen gescheiden: een alarm is een onderzoeksopdracht, geen reden voor een gameplaywijziging.
+- IJking verliesclassificatie ingevoerd in `verlies.ts`: PB < 30%, BG ≥ 90%, ES alleen vóór het kantelpunt K.
+- "Eerste uitbreiding" gebruikt nu alle startvelden binnen 10 tegels (`startFields` in `meting.ts`); de nep-uitbreidingen op Islands zijn weg.
+- Nieuw: `RECOMPUTE=a.raw.json,… npx vitest run balance` bouwt rapporten opnieuw uit de ruwe telemetrie, zonder te simuleren. Alle nulmetingsrapporten zijn zo herberekend; het ore-harnas blijft identiek.
+- Bevinding: op zee slaat PB in 36/36 verloren potjes aan (richtwaarde > 60%) → onderzoeken op overgevoeligheid.
+- Open: harassment-kosten (signaal fase 23) is nog geen metriek.
+- Statistiek per eenheid nu ook **per speler** (`unitsByPlayer` in `meting.ts`), met `taken`/`lost` voor overnames: een overgenomen eenheid telt haar kills voor de nieuwe eigenaar.
+
+**Telemetrie compleet voor `playtest-r1`** (2026-10-06):
+- **Rig-inkomen:** `PlayerStats.rig` en per snapshot `rig` (deel van `income`). Metriek `rigIncome` per speler.
+- **Gratis eenheden:** event `spawned` met `reason` (`freeUnit` Hauler bij een raffinaderij, `escort` Thralls, `mutagen` Brutes); `free` in `unitsByPlayer`.
+- **Harassment-kosten** (signaal fase 23): `harassment()` in `meting.ts`, bruto en netto (min de daling bij de aanvaller). Nulmeting: netto mediaan 0,1–0,3 min inkomen per raid, dus het signaal "harassment kost < 1 min" staat op **ja**.
+- Tests: rig en `spawned` live in een echt potje, harassment op opgebouwde telemetrie (ook het geval "velden leeg, geen raid-effect"). Determinisme blijft gelijk; de export-e2e slaagt.
+- Oude exports blijven leesbaar: `rigIncome` is dan `null`.

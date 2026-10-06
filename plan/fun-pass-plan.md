@@ -245,7 +245,7 @@ Alle metrieken staan per potje in de JSON (20.6) en worden in het rapport sameng
 
 | Moment | Definitie |
 |---|---|
-| Eerste uitbreiding | Eerste refinery of CY met `built = 1` die dichter bij een ander veld ligt dan bij het startveld |
+| Eerste uitbreiding | Eerste afgebouwde refinery of uitgeklapte CY waarvan het dichtstbijzijnde veld geen startveld is. Startvelden = alle velden met het midden binnen 10 tegels van de start (bevroren in `docs/metingen/grenzen.md` §4) |
 | Eerste tech-keuze | Eerste `enqueued` van `lab`, of van een `def` die `lab` direct of indirect vereist, of eerste overname van een tech-gebouw |
 | Eerste aanval op economie | Eerste `underAttack`/`death` met `by` = deze speler op een vijandelijke harvester of refinery |
 | Eerste defensieve reactie | Na de eerste vijandelijke `underAttack` op eigen gebouw of harvester: eerste beslissing binnen 60 s die een gewapende eenheid naar ≤ 8 tegels van die plek stuurt, een verdedigingsgebouw bestelt of repareert. Rapport: tijdstip én reactietijd. Geen reactie = leeg. |
@@ -282,11 +282,12 @@ Het echte probleem is **`gelijk` → schot → tegenstander binnen 90 s uit**. `
 
 | Metriek | Definitie |
 |---|---|
-| Inkomen | Credits per minuut uit `income` (plus `stolen`, `bonus` apart), per minuut van het potje |
+| Inkomen | Credits per minuut uit `income` (plus `stolen`, `bonus` apart), per minuut van het potje. Het deel uit Fuel Rigs staat apart in `rig` (zit ook in `income`; toegevoegd 2026-10-06) |
 | Besteed | Totaal besteed aan productie per minuut |
 | Velden | Aantal velden met een eigen refinery binnen 8 tegels; per veld het restant (% van tick 0) over de tijd; eerste moment < 25% |
 | Uitputting | % potjes waarin het startveld ooit < 25% zat, en wanneer |
 | Uitbreiding | % potjes met een tweede CY; tijd tot de tweede CY; tijd tot de eerste uitbreiding (C); winrate met vs. zonder |
+| Harassment | Per raid op Haulers of raffinaderij van een speler (nieuwe raid ≥ 2 min na de vorige): daling van zijn inkomen in de 2 min erna t.o.v. de 2 min ervoor, in minuten inkomen. **Netto** = min dezelfde daling bij de aanvaller (velden raken toch leeg). Signaal fase 23 gebruikt netto. Toegevoegd 2026-10-06 |
 | Patstelling | Potje bereikt 30 min zonder winnaar |
 
 **G. Gebruik en balans**
@@ -390,7 +391,7 @@ Fase 23 moet de economie los kunnen meten: huidige economie vs. nieuwe economie,
 ### Klaar als
 - [x] Nulmeting op basis 1.3.0 staat in `docs/metingen/` _(2026-10-06, build `1.3.0+2f1b3f7d`; samenvatting `docs/metingen/2026-10-06-nulmeting-samenvatting.md`)_: land, zee, normal-medium, zonder superwapens, ore-v12, scenario's, duelmatrix land en zee; elk als `.md` en `.json`.
 - [x] `build` en `aiVersion` staan in elke export en elk rapport (met of zonder git, 20.4).
-- [ ] _(voorstel staat er, wacht op akkoord)_ Alarm- en doelgrenzen staan bevroren in `docs/metingen/grenzen.md`, vóór fase 22 begint (§2 regel 6).
+- [x] Alarm- en doelgrenzen staan bevroren in `docs/metingen/grenzen.md`, vóór fase 22 begint (§2 regel 6). _(2026-10-06)_
 - [x] Het rapport noemt per metriek uit 20.2 de basiswaarde (mediaan en spreiding), apart voor AI; er staan geen verzonnen grenzen in.
 - [x] Determinisme: een test speelt hetzelfde potje met en zonder telemetrie (en met `oreRules` leeg vs. `'v12'`) en vergelijkt winnaar, tick en een hash van de eindstand **zonder** `s.telemetry`. Identiek.
 - [x] Soak-test en alle bestaande tests groen.

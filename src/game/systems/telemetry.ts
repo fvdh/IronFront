@@ -55,7 +55,7 @@ export function initTelemetry(s: GameState): Telemetry {
     build: BUILD, aiVersion: AI_VERSION, fieldOf, fieldOre, fieldPos,
     snaps: [], ev: [], dec: [],
     samples: s.players.map(() => ['', '', '']),
-    acc: s.players.map((p) => ({ harvested: p.stats.harvested, stolen: 0, bonus: 0, credits: p.credits })),
+    acc: s.players.map((p) => ({ harvested: p.stats.harvested, stolen: 0, bonus: 0, rig: 0, credits: p.credits })),
   };
 }
 
@@ -101,16 +101,16 @@ export const armed = (e: Entity) => e.kind === 'unit' && e.hp > 0 && !e.inside &
 
 function snapshot(s: GameState, tm: Telemetry, owner: number): Snapshot {
   const p = s.players[owner], a = tm.acc[owner];
-  const stolen = p.stats.stolen ?? 0, bonus = p.stats.bonus ?? 0;
+  const stolen = p.stats.stolen ?? 0, bonus = p.stats.bonus ?? 0, rig = p.stats.rig ?? 0;
   const income = p.stats.harvested - a.harvested;
   // ponytail: spent = money in minus what is left; sell refunds and production refunds count as negative spending.
   const spent = Math.max(0, a.credits + income + (stolen - a.stolen) + (bonus - a.bonus) - p.credits);
   const snap: Snapshot = {
-    t: s.tick, p: owner, credits: Math.round(p.credits), income, stolen: stolen - a.stolen, bonus: bonus - a.bonus, spent: Math.round(spent),
+    t: s.tick, p: owner, credits: Math.round(p.credits), income, stolen: stolen - a.stolen, bonus: bonus - a.bonus, rig: rig - (a.rig ?? 0), spent: Math.round(spent),
     army: 0, bld: 0, inf: 0, veh: 0, air: 0, sea: 0, cy: 0, harv: 0, power: p.powerMade - p.powerUsed,
     fields: [], options: CATS.map((c) => available(s, owner, c).length), conc: null, byDef: {},
   };
-  tm.acc[owner] = { harvested: p.stats.harvested, stolen, bonus, credits: p.credits };
+  tm.acc[owner] = { harvested: p.stats.harvested, stolen, bonus, rig, credits: p.credits };
   const units: Entity[] = [];
   for (const e of s.entities) {
     if (e.owner !== owner || e.hp <= 0) continue;

@@ -7,6 +7,8 @@
 //   BALANCE_REPORT=<label>: docs/metingen/<date>-<label>.md + .json (metrics per game) · BALANCE_RAW=1: also the telemetry
 //   BALANCE_CONTROL=<json>: the same run without superweapons, for the over-win (20.2-D)
 //   COMPARE=a.json,b.json npx vitest run balance: comparison report next to b
+//   RECOMPUTE=a.raw.json[,b.raw.json…] npx vitest run balance: rebuild a.json/.md from the telemetry, no simulation
+//     (a control run …-nosw-<x>.json next to it is used automatically)
 // @ts-expect-error no Node typings in this project; vitest runs in Node
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
@@ -82,7 +84,7 @@ describe.skipIf(!N)('balance', () => {
       maps: MAPS.join(','), seeds: `${SEEDS} vanaf ${env.BALANCE_SEED ?? 1000}`, size: env.BALANCE_SIZE ?? 'small', diff: `${D0},${D1}`,
       superwapens: env.BALANCE_NOSW ? 'uit' : 'aan', ore: env.BALANCE_ORE ?? 'v12 (standaard)', stad: TOWN ? 'aan' : 'uit', ...(env.BALANCE_PART ? { deel: env.BALANCE_PART } : {}),
     };
-    const run: Run = { label: env.BALANCE_REPORT, date, settings, matches: records.map((r) => { const c = classify(r); return { ...matchMetrics(r), loss: c && { main: c.main, causes: Object.keys(c.causes) } }; }) };
+    const run: Run = { label: env.BALANCE_REPORT, date, settings, matches: records.map(withLoss) };
     const control = env.BALANCE_CONTROL ? (JSON.parse(readFileSync(env.BALANCE_CONTROL, 'utf8')) as Run) : undefined;
     mkdirSync('docs/metingen', { recursive: true });
     const base = `docs/metingen/${date}-${env.BALANCE_REPORT}`;
@@ -91,6 +93,23 @@ describe.skipIf(!N)('balance', () => {
     if (env.BALANCE_RAW) writeFileSync(`${base}.raw.json`, JSON.stringify(records));
     console.log(`→ ${base}.md`);
   }, 24 * 3_600_000);
+});
+
+const withLoss = (r: MatchRecord) => { const c = classify(r); return { ...matchMetrics(r), loss: c && { main: c.main, causes: Object.keys(c.causes) } }; };
+
+describe.skipIf(!env.RECOMPUTE)('recompute', () => {
+  it('metrics from stored telemetry', () => {
+    for (const raw of env.RECOMPUTE!.split(',')) {
+      const base = raw.replace(/\.raw\.json$/, ''), old = JSON.parse(readFileSync(`${base}.json`, 'utf8')) as Run;
+      const run: Run = { ...old, matches: (JSON.parse(readFileSync(raw, 'utf8')) as MatchRecord[]).map(withLoss) };
+      const ctl = base.replace(/-(land|zee)$/, '-nosw-$1');
+      let control: Run | undefined;
+      try { if (ctl !== base && !base.includes('-nosw-')) control = JSON.parse(readFileSync(`${ctl}.json`, 'utf8')); } catch { /* no control run */ }
+      writeFileSync(`${base}.json`, JSON.stringify(run));
+      writeFileSync(`${base}.md`, report(run, control));
+      console.log(`→ ${base}.md${control ? ' (control ' + ctl + ')' : ''}`);
+    }
+  });
 });
 
 describe.skipIf(!env.COMPARE)('compare', () => {

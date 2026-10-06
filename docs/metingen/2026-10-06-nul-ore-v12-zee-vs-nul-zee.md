@@ -10,7 +10,7 @@ A: 36 potjes, B: 36 potjes. Verschil = gemiddelde B − gemiddelde A, 95%-interv
 | comeback | 0.31 | 0.31 | 0.00 | -0.22 – 0.22 |
 | inkomen min 10 ($/min, gem. spelers) | 422.07 | 422.07 | 0.00 | -221.52 – 218.02 |
 | besteed min 10 ($/min, gem. spelers) | 466.93 | 466.93 | 0.00 | -259.94 – 251.41 |
-| eerste uitbreiding (min, gem. spelers) | 0.50 | 0.50 | 0.00 | 0.00 – 0.00 |
+| eerste uitbreiding (min, gem. spelers) | – | – | – | – |
 | startveld < 25% (aandeel spelers) | 1.00 | 1.00 | 0.00 | 0.00 – 0.00 |
 | arm-idle (gem. spelers) | 0.35 | 0.35 | 0.00 | -0.02 – 0.02 |
 | keuze-idle (gem. spelers) | 0.05 | 0.05 | 0.00 | -0.01 – 0.01 |
