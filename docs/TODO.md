@@ -519,3 +519,8 @@ Bekende beperkingen (bewust niet gedaan):
 ### Onderzoek BL1 en correctie PB (2026-10-06)
 - **BL1 vervalt:** de AI bouwt op zeekaarten vrijwel geen schepen; Red Bloc verliest daar landgevechten. Op Coast/Islands zitten alle facties 70% van de tijd zonder geld (signaal voor fase 23). Zie `docs/metingen/2026-10-06-bl1-onderzoek.md`.
 - **PB gecorrigeerd** (akkoord opdrachtgever): alleen seconden met geld tellen. PB was voor AI-potjes volledig een artefact; X stijgt naar 23% (ijkset) en 37% (land). Zie `grenzen.md`, correctie onderaan. Alle runs herberekend.
+
+### Nederlaagregel (2026-10-06, besluit opdrachtgever)
+- `isDefeated`: geen gebouwen (muren en veroverde tech-gebouwen tellen niet) en geen Base Crawler = verloren; eenheden alleen houden je niet meer in het spel.
+- Uitkomst: patstellingen Normal-medium 2/27 → 0, winnaars verder gelijk, potjes iets korter. Doelgrens patstellingen gehaald. `docs/metingen/2026-10-06-nederlaag-hypothese.md`.
+- CHANGELOG: sectie "Unreleased" met de spelerszichtbare wijzigingen van Fun Pass tot nu toe.
