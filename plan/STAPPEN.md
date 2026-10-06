@@ -44,6 +44,8 @@ Laatst bijgewerkt: 2026-10-02. Dit is het startpunt om het werk later weer op te
   - testers en beoordelaars werven (beslissing 11);
   - akkoord geven op de definitie van "leuk", de fun-audit en de verliesclassificatie, en die bevriezen (beslissing 12).
 
+> **Bijgesteld 2026-10-06:** geen testers beschikbaar. Ronde 1 (spoor A) schuift naar later als validatie; verbeteringen starten op AI-data (stap 5), te beginnen met BL2.
+
 ### Stap 3: twee sporen naast elkaar
 - [ ] **Spoor A:** fase 21, playtest-ronde 1, op build `playtest-r1` (1.3.0 met telemetrie, zonder AI-wijzigingen).
 - [x] **Spoor B:** 26.A (AI-geheugen en exploit-fix) in branch `fase-26a`, referentiemeting `ref-26a` gedraaid _(2026-10-06, `docs/metingen/2026-10-06-ref-26a-samenvatting.md`)_. Gemerged in `main` (2026-10-06); `playtest-r1` hoort op commit `b573c46` (vóór 26.A).

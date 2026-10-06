@@ -46,6 +46,8 @@ export const submerged = (s: GameState, e: Entity) => e.kind === 'unit' && !!UNI
 export const onWater = (e: Entity) => (e.kind === 'unit' ? UNITS[e.def].move === 'water' : !!BUILDINGS[e.def].naval);
 
 export const isAir = (e: Entity) => e.kind === 'unit' && !!UNITS[e.def].air && !e.landed && !e.deployed; // parked / landed aircraft are ground targets
+/** Damage multiplier of `w` against `t`: its armour, with the anti-air override against flying targets. */
+export const versusOf = (w: WeaponDef, t: Entity) => (isAir(t) ? w.versusAir?.[armorOf(t)] : undefined) ?? w.versus[armorOf(t)];
 export const berserk = (s: GameState, e: Entity) => (e.berserkUntil ?? 0) > s.tick;
 /** Weapon range including the dug-in bonus. */
 export const rangeOf = (e: Entity, w: WeaponDef) => w.range + (e.dug ? 1.5 : 0);
@@ -58,7 +60,7 @@ export function canHit(w: WeaponDef, t: Entity): boolean {
   if (t.kind === 'unit' && UNITS[t.def].stealth && !w.sub) return false; // only torpedoes, depth charges and sonar reach a sub
   if (w.fuse && t.bombAt) return false; // one bomb is enough
   if (w.control) return t.kind === 'unit' ? !w.buildingsOnly && !WEAPONS[UNITS[t.def].weapon ?? '']?.control && !UNITS[t.def].hero && !UNITS[t.def].drone && !controlled(t) : !!w.controlBuildings && !BUILDINGS[t.def].wall && t.def !== 'cy' && !BUILDINGS[t.def].superweapon;
-  return w.versus[armorOf(t)] > 0;
+  return versusOf(w, t) > 0;
 }
 /** Live mind-control link? */
 export const controlled = (t: Entity) => !!t.mcBy;
@@ -195,7 +197,7 @@ function hit(s: GameState, t: Entity | undefined, w: WeaponDef, owner: number, x
   }
   if (!w.splash) {
     if (!t) return;
-    damage(s, t, w.damage * w.versus[armorOf(t)] * k, owner, by, cause);
+    damage(s, t, w.damage * versusOf(w, t) * k, owner, by, cause);
     if (w.grab) t.frozenUntil = Math.max(t.frozenUntil ?? 0, s.tick + w.cooldown + 10); // held fast until the next squeeze
     if (w.stun && t.kind === 'unit' && WEAPONS[UNITS[t.def].weapon ?? '']?.grab) t.frozenUntil = Math.max(t.frozenUntil ?? 0, s.tick + w.stun); // shaken off: its prey slips away
     if (w.drain && t.kind === 'building') drain(s, t, owner);
@@ -207,7 +209,7 @@ function hit(s: GameState, t: Entity | undefined, w: WeaponDef, owner: number, x
     if (o.owner === owner || o.hp <= 0 || o.inside || !canHit(w, o) || (o.kind === 'building' && BUILDINGS[o.def].bridge)) continue; // bridges: only aimed fire
     const d = distTo(x, y, o);
     if (d > w.splash) continue;
-    damage(s, o, w.damage * w.versus[armorOf(o)] * k * (1 - (0.5 * d) / w.splash), owner, by, cause);
+    damage(s, o, w.damage * versusOf(w, o) * k * (1 - (0.5 * d) / w.splash), owner, by, cause);
     if (w.berserk && o.kind === 'unit' && !UNITS[o.def].hero) o.berserkUntil = s.tick + w.berserk;
   }
   if (w.splash > 1) s.effects.push({ kind: 'bigExplosion', x, y, x2: 0, y2: 0, t: 0, life: 24, color: '' });
