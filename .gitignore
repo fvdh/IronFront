@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-play
+test-results
+playwright-report
+.DS_Store
+.claude/
+# Raw match telemetry of measuring runs: large, and regenerated exactly by tools/nulmeting.sh on the same commit.
+*.raw.json

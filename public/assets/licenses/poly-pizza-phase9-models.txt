@@ -1,0 +1,32 @@
+3D models from poly.pizza added for the phase-9 units
+====================================================
+
+Licence of each model as stated on its poly.pizza source page ("Licence" field), checked 2026-10-01.
+This file restates that record; it does not add licence information. Re-check the source page
+before every release. All models are rendered (at load time) to isometric 2D sprites.
+
+CC-BY 3.0 — attribution required — https://creativecommons.org/licenses/by/3.0/
+-------------------------------------------------------------------------------
+- models/heli-gunship.glb  "Helicopter" by Zsky — https://poly.pizza/m/hG2Qr0A3zR
+    (file: https://static.poly.pizza/6f3cef79-867c-4b3c-9d97-346e465e4079.glb)
+    Used as: unit.siegerotor. Changes: scaled, body recoloured, team colour on the yellow/orange
+    accents, a long cannon barrel + breech block (Kenney Space Kit / Tower Defense Kit shapes) added underneath.
+- models/jet-strike.glb    "Jet" by jeremy — https://poly.pizza/m/6fyLMORhgGK
+    (file: https://static.poly.pizza/19d58465-dafb-4df0-a3b8-b0500bd9ed4b.glb)
+    Used as: unit.talon. Changes: scaled, recoloured dark grey with an amber canopy, team-coloured
+    dorsal stripe (Kenney Space Kit cylinder) added.
+- models/brain.glb         "Brain" by J-Toastie — https://poly.pizza/m/YihDCHsOPO
+    (file: https://static.poly.pizza/ced5c1af-0289-48ef-9622-ee4ba5382141.glb)
+    Used as: unit.hivemind (brain dome, tinted lilac), unit.deliriumdrone (tinted yellow-green as a gas cloud).
+    Changes: scaled, recoloured, combined with Kenney Space Kit craft.
+
+CC0 1.0 — no attribution required (credited anyway) — https://creativecommons.org/publicdomain/zero/1.0/
+-------------------------------------------------------------------------------------------------
+- models/spider.glb        "Spider" by Quaternius — https://poly.pizza/m/yRYJiAJyiM
+    (file: https://static.poly.pizza/4259fbdb-afb5-4d40-9108-363625dd6b6e.glb)
+    Used as: unit.leechdrone. Changes: scaled, recoloured metal grey, team colour on the accent material,
+    red eye block added; Idle/Walk/Attack/Death animations baked to sprite frames.
+- models/lifeboat.glb      "Lifeboat" by Quaternius — https://poly.pizza/m/Bkd4KKQA4O
+    (file: https://static.poly.pizza/7c88c458-7a3a-4a74-97a4-d24e1ef933f2.glb)
+    Used as: unit.amphib (hovercraft skirt). Changes: scaled, recoloured, cabin blocks + team stripe and two
+    fan rings (Kenney Space Kit gate_simple) added.

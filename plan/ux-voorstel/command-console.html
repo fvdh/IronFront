@@ -1,0 +1,881 @@
+<title>Iron Front Command Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=Share+Tech+Mono&display=swap">
+<style>
+/* Single committed dark world: a command console, not a web page. */
+:root {
+  color-scheme: dark;
+  --ground: oklch(0.155 0.008 250);
+  --ground-2: oklch(0.19 0.01 250);
+  --ground-3: oklch(0.235 0.012 250);
+  --line: oklch(0.33 0.012 250);
+  --ink: oklch(0.93 0.008 90);
+  --ink-2: oklch(0.74 0.01 250);
+  --ink-3: oklch(0.58 0.012 250);
+  --signal: oklch(0.82 0.15 78);
+  --ok: oklch(0.78 0.18 145);
+  --warn: oklch(0.84 0.16 92);
+  --bad: oklch(0.66 0.21 28);
+  --info: oklch(0.8 0.11 220);
+  --display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
+  --body: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'Share Tech Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html { background: var(--ground); }
+body { background: var(--ground); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 24px; padding-block: 0 96px; }
+@media (max-width: 560px) { .wrap { padding-inline: 16px; } }
+h1, h2, h3, .eyebrow, .btnish { font-family: var(--display); text-wrap: balance; }
+h2 { font-size: clamp(30px, 4vw, 44px); line-height: 1; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; margin: 0 0 14px; }
+h3 { font-size: 21px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 6px; }
+p { margin: 0 0 12px; max-width: 68ch; }
+.lede { color: var(--ink-2); font-size: 18px; }
+.eyebrow { font-size: 14px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--signal); margin: 0 0 10px; display: flex; gap: 10px; align-items: center; }
+.eyebrow b { font-family: var(--mono); font-weight: 400; color: var(--ink-3); letter-spacing: 0.05em; }
+section { padding-block: 72px 0; }
+.mono { font-family: var(--mono); }
+a { color: var(--info); }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+/* ---------- Masthead ---------- */
+.mast { padding-block: 56px 8px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px; align-items: end; }
+.mast h1 { font-size: clamp(54px, 9vw, 112px); line-height: 0.86; font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: -0.01em; }
+.mast h1 span { display: block; color: var(--signal); }
+.mast .tag { font-family: var(--mono); color: var(--ink-3); font-size: 13px; letter-spacing: 0.08em; margin: 0 0 18px; }
+.decisions { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.decisions div { display: grid; grid-template-columns: 112px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.decisions dt, .decisions .k { font-family: var(--display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; font-size: 13px; color: var(--ink-3); padding-top: 2px; }
+@media (max-width: 860px) { .mast { grid-template-columns: 1fr; gap: 28px; } }
+
+/* ---------- Before ---------- */
+.before { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 36px; align-items: start; }
+.before figure { margin: 0; position: relative; }
+.before img { display: block; width: 100%; border: 1px solid var(--line); filter: saturate(0.85); }
+.before figcaption { font-family: var(--mono); font-size: 12px; color: var(--ink-3); margin-top: 8px; }
+.issues { list-style: none; margin: 0; padding: 0; counter-reset: i; }
+.issues li { counter-increment: i; display: grid; grid-template-columns: 34px 1fr; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.issues li::before { content: counter(i, decimal-leading-zero); font-family: var(--mono); color: var(--bad); font-size: 14px; padding-top: 2px; }
+.issues b { font-weight: 600; }
+@media (max-width: 860px) { .before { grid-template-columns: 1fr; } }
+
+/* ---------- Faction switch ---------- */
+.switch { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 16px; }
+.switch button { font: 700 16px var(--display); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-2); background: var(--ground-2); border: 1px solid var(--line); padding: 10px 16px 9px; cursor: pointer; display: flex; gap: 10px; align-items: center; transition: background 160ms cubic-bezier(.22,1,.36,1), color 160ms; }
+.switch button i { width: 12px; height: 12px; display: block; }
+.switch button[aria-pressed="true"] { color: var(--ink); background: var(--ground-3); border-color: var(--ink-3); }
+.switch button:hover { color: var(--ink); }
+
+/* ---------- Scaled stages (mockups are built at true pixel size, then scaled) ---------- */
+.stage { position: relative; width: 100%; overflow: hidden; border: 1px solid var(--line); background: #0b0d10; }
+.stage > .screen { position: absolute; top: 0; left: 0; transform-origin: 0 0; transform: scale(var(--k, 0.5)); }
+.note-row { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-top: 12px; font-size: 14px; color: var(--ink-2); }
+.note-row span::before { content: attr(data-n); font-family: var(--mono); color: var(--signal); margin-right: 6px; }
+
+/* ================= FACTION MATERIALS ================= */
+.fx { --rivet-c: oklch(0.82 0.02 240); }
+.fx[data-faction="allies"] {
+  --c-hi: oklch(0.7 0.025 240); --c-mid: oklch(0.47 0.03 243); --c-lo: oklch(0.27 0.028 248); --c-deep: oklch(0.17 0.02 250);
+  --glow: oklch(0.84 0.12 205); --glow-dim: oklch(0.55 0.08 210); --lamp: oklch(0.84 0.12 205);
+  --plate-r: 2px; --team: oklch(0.62 0.17 255);
+}
+.fx[data-faction="soviets"] {
+  --c-hi: oklch(0.56 0.12 32); --c-mid: oklch(0.4 0.11 30); --c-lo: oklch(0.25 0.06 32); --c-deep: oklch(0.155 0.03 35);
+  --glow: oklch(0.82 0.16 72); --glow-dim: oklch(0.55 0.12 60); --lamp: oklch(0.82 0.16 72);
+  --plate-r: 0px; --rivet-c: oklch(0.7 0.06 50); --team: oklch(0.6 0.2 28);
+}
+.fx[data-faction="psi"] {
+  --c-hi: oklch(0.55 0.13 312); --c-mid: oklch(0.37 0.11 308); --c-lo: oklch(0.22 0.07 305); --c-deep: oklch(0.145 0.04 305);
+  --glow: oklch(0.76 0.2 340); --glow-dim: oklch(0.5 0.15 335); --lamp: oklch(0.76 0.2 340);
+  --plate-r: 10px; --rivet-c: transparent; --team: oklch(0.58 0.2 305);
+}
+/* brushed / painted metal */
+.metal {
+  background:
+    repeating-linear-gradient(90deg, oklch(1 0 0 / 0.025) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, var(--c-hi) 0%, var(--c-mid) 9%, var(--c-lo) 100%);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.28), inset 0 -2px 0 oklch(0 0 0 / 0.45), inset 1px 0 0 oklch(1 0 0 / 0.1), inset -1px 0 0 oklch(0 0 0 / 0.4);
+}
+.fx[data-faction="soviets"] .metal {
+  background:
+    radial-gradient(circle at 7px 7px, var(--rivet-c) 0 2.2px, oklch(0 0 0 / 0.6) 2.6px, transparent 3.4px) 0 0 / 100% 100% no-repeat,
+    radial-gradient(circle at calc(100% - 7px) 7px, var(--rivet-c) 0 2.2px, oklch(0 0 0 / 0.6) 2.6px, transparent 3.4px) 0 0 / 100% 100% no-repeat,
+    repeating-linear-gradient(0deg, oklch(0 0 0 / 0.06) 0 2px, transparent 2px 5px),
+    linear-gradient(180deg, var(--c-hi) 0%, var(--c-mid) 10%, var(--c-lo) 100%);
+}
+.fx[data-faction="psi"] .metal {
+  background:
+    radial-gradient(120% 60% at 50% 0%, oklch(0.75 0.2 340 / 0.16), transparent 60%),
+    linear-gradient(180deg, var(--c-hi) 0%, var(--c-mid) 12%, var(--c-lo) 100%);
+}
+.well { background: var(--c-deep); box-shadow: inset 0 2px 6px oklch(0 0 0 / 0.7), inset 0 0 0 1px oklch(0 0 0 / 0.6), 0 1px 0 oklch(1 0 0 / 0.12); border-radius: var(--plate-r); }
+.rivets { position: relative; }
+.rivets::before, .rivets::after { content: ''; position: absolute; top: 6px; width: 6px; height: 6px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, oklch(0.95 0.01 240), var(--rivet-c) 45%, oklch(0.2 0.01 240) 100%); box-shadow: 0 1px 1px oklch(0 0 0 / 0.6); }
+.rivets::before { left: 6px; } .rivets::after { right: 6px; }
+.fx[data-faction="psi"] .rivets::before, .fx[data-faction="psi"] .rivets::after { display: none; }
+
+/* ================= HUD (1440 x 900) ================= */
+.hud { width: 1440px; height: 900px; position: relative; font-family: var(--body); color: oklch(0.94 0.01 90); overflow: hidden; }
+.field { position: absolute; inset: 0 300px 0 0; background: #0b0d10 url(img/field.jpg) -120px -40px / 1600px 1000px no-repeat; }
+.field::after { content: ''; position: absolute; inset: 0; background: radial-gradient(140% 120% at 60% 50%, transparent 55%, oklch(0 0 0 / 0.45)); pointer-events: none; }
+
+/* top strip */
+.topstrip { position: absolute; top: 0; left: 50%; transform: translateX(-50%); margin-left: -150px; display: flex; align-items: stretch; height: 34px; z-index: 3; }
+.topstrip > * { display: flex; align-items: center; padding: 0 14px; font: 600 15px var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
+.topstrip .clock { font-family: var(--mono); font-size: 17px; letter-spacing: 0.06em; color: var(--glow); }
+.topstrip .metal { border-radius: 0 0 var(--plate-r) var(--plate-r); }
+.topstrip .spd { gap: 2px; padding: 0 6px; }
+.topstrip .spd b { font: 400 13px var(--mono); padding: 3px 7px; color: oklch(0.8 0.01 90); letter-spacing: 0; }
+.topstrip .spd b.on { background: var(--c-deep); color: var(--glow); box-shadow: inset 0 1px 3px oklch(0 0 0 / 0.7); }
+
+/* superweapon timers */
+.swt { position: absolute; top: 12px; left: 14px; display: grid; gap: 6px; z-index: 3; }
+.swt div { display: grid; grid-template-columns: 10px auto 1fr; align-items: center; gap: 10px; min-width: 270px; padding: 6px 12px 6px 10px; background: oklch(0.13 0.01 250 / 0.82); box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.08); }
+.swt i { width: 10px; height: 10px; transform: rotate(45deg); background: var(--glow); }
+.swt div.enemy i { background: var(--bad); }
+.swt span { font: 600 15px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+.swt small { display: block; font: 500 12px var(--body); letter-spacing: 0.02em; text-transform: none; color: oklch(0.7 0.01 250); }
+.swt em { font: 400 20px var(--mono); font-style: normal; justify-self: end; color: var(--glow); }
+.swt div.enemy em { color: var(--bad); }
+
+/* announcer subtitles */
+.subs { position: absolute; top: 112px; left: 14px; display: grid; gap: 4px; z-index: 3; }
+.subs p { margin: 0; display: flex; align-items: center; gap: 8px; font: 600 16px var(--display); letter-spacing: 0.08em; text-transform: uppercase; text-shadow: 0 1px 2px #000; }
+.subs p svg { flex: none; }
+.subs p.old { opacity: 0.55; }
+.subs p.alert { color: oklch(0.8 0.17 30); }
+
+/* selection brackets on the screenshot */
+.brk { position: absolute; width: 50px; height: 40px; z-index: 2; }
+.brk::before { content: ''; position: absolute; inset: 0; --c: oklch(0.96 0.01 90);
+  background: linear-gradient(var(--c), var(--c)) 0 0 / 11px 2px, linear-gradient(var(--c), var(--c)) 0 0 / 2px 9px,
+    linear-gradient(var(--c), var(--c)) 100% 0 / 11px 2px, linear-gradient(var(--c), var(--c)) 100% 0 / 2px 9px,
+    linear-gradient(var(--c), var(--c)) 0 100% / 11px 2px, linear-gradient(var(--c), var(--c)) 0 100% / 2px 9px,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 11px 2px, linear-gradient(var(--c), var(--c)) 100% 100% / 2px 9px;
+  background-repeat: no-repeat; filter: drop-shadow(0 1px 1px #000); }
+.pips { position: absolute; left: 0; top: -9px; display: flex; gap: 1px; }
+.pips i { width: 4px; height: 5px; background: var(--ok); box-shadow: 0 0 0 1px oklch(0 0 0 / 0.7); }
+.pips i.off { background: oklch(0.3 0.01 250); }
+.vet { position: absolute; right: -12px; top: -12px; color: var(--warn); font: 800 12px var(--display); }
+
+/* order line + rally */
+.orderline { position: absolute; z-index: 2; pointer-events: none; }
+/* placement ghost */
+.ghost { position: absolute; z-index: 2; }
+/* minimap ping lives in the radar */
+
+/* command bar */
+.cmdbar { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); margin-left: -150px; z-index: 3; display: grid; grid-template-columns: auto auto auto; align-items: stretch; height: 92px; }
+.cmdbar .portrait { width: 116px; padding: 6px; border-radius: var(--plate-r) 0 0 0; }
+.cmdbar .portrait .well { height: 100%; overflow: hidden; display: grid; place-items: center; position: relative; }
+.cmdbar .portrait img { width: 128%; transform: translateY(-6%); }
+.cmdbar .portrait b { position: absolute; right: 4px; bottom: 2px; font: 800 18px var(--display); text-shadow: 0 1px 2px #000; }
+.cmdbar .unit { padding: 10px 14px; min-width: 210px; display: grid; align-content: center; gap: 4px; }
+.cmdbar .unit h4 { margin: 0; font: 700 19px var(--display); text-transform: uppercase; letter-spacing: 0.06em; }
+.cmdbar .unit .hp { display: flex; gap: 2px; }
+.cmdbar .unit .hp i { width: 9px; height: 8px; background: var(--ok); box-shadow: inset 0 -2px 0 oklch(0 0 0 / 0.3); }
+.cmdbar .unit .hp i.y { background: var(--warn); } .cmdbar .unit .hp i.o { background: oklch(0.3 0.01 250); }
+.cmdbar .unit small { font: 500 13px var(--body); color: oklch(0.8 0.01 250); }
+.cmdbar .orders { display: grid; grid-template-columns: repeat(5, 72px); gap: 4px; padding: 8px 8px 8px 0; border-radius: 0 var(--plate-r) 0 0; }
+.ord { display: grid; place-items: center; align-content: center; gap: 3px; padding: 4px 0; position: relative; font: 600 12px var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.92 0.01 90); }
+.ord svg { width: 26px; height: 26px; }
+.ord kbd { position: absolute; top: 3px; left: 5px; font: 400 11px var(--mono); color: var(--glow); }
+.ord.on { box-shadow: inset 0 0 0 1px var(--glow), inset 0 0 14px oklch(from var(--glow) l c h / 0.35); }
+.ord.dis { opacity: 0.38; }
+
+/* ---------- Sidebar ---------- */
+.side { position: absolute; top: 0; right: 0; bottom: 0; width: 300px; display: grid; grid-template-columns: 22px 1fr; z-index: 4; }
+.side .rail { padding: 10px 5px; display: grid; grid-template-rows: auto 1fr auto; gap: 6px; justify-items: center; }
+.rail .seg { display: flex; flex-direction: column-reverse; gap: 2px; width: 10px; }
+.rail .seg i { height: 13px; background: oklch(0.24 0.01 250); box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.6); }
+.rail .seg i.g { background: var(--ok); box-shadow: 0 0 6px oklch(from var(--ok) l c h / 0.6); }
+.rail .seg i.y { background: var(--warn); }
+.rail .seg i.mark { box-shadow: 0 0 0 1px var(--ink), 0 0 6px var(--ink); }
+.rail svg { width: 12px; height: 12px; color: var(--warn); }
+.rail .lbl { writing-mode: vertical-rl; transform: rotate(180deg); font: 600 11px var(--display); letter-spacing: 0.2em; color: oklch(0.85 0.01 90); }
+.side .col { display: grid; grid-template-rows: auto auto auto auto 1fr auto; gap: 8px; padding: 8px 10px 10px 4px; min-height: 0; }
+.crest { display: grid; grid-template-columns: 48px 1fr; gap: 10px; align-items: center; padding: 8px 10px 8px 8px; border-radius: var(--plate-r); }
+.crest svg { width: 46px; height: 46px; color: var(--glow); filter: drop-shadow(0 0 6px oklch(from var(--glow) l c h / 0.5)); }
+.crest .fname { font: 700 12px var(--display); letter-spacing: 0.22em; text-transform: uppercase; color: oklch(0.88 0.02 90); }
+.odo { display: flex; gap: 2px; margin-top: 3px; }
+.odo b { font: 400 25px/1 var(--mono); color: var(--glow); width: 17px; text-align: center; padding: 4px 0 3px; background: linear-gradient(180deg, oklch(0.1 0.01 250), oklch(0.17 0.01 250) 48%, oklch(0.08 0.01 250) 52%, oklch(0.14 0.01 250)); border-radius: 2px; box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.8); text-shadow: 0 0 8px oklch(from var(--glow) l c h / 0.6); }
+.odo b.sep { width: 8px; background: none; box-shadow: none; }
+.odo b.roll { animation: roll 1.6s cubic-bezier(.22,1,.36,1) infinite; }
+@keyframes roll { 0%, 70% { transform: translateY(0); } 85% { transform: translateY(-3px); opacity: .6; } 100% { transform: translateY(0); } }
+.radar { padding: 7px; border-radius: var(--plate-r); }
+.radar .well { height: 136px; position: relative; overflow: hidden; display: grid; place-items: center; }
+.radar img { width: 252px; image-rendering: auto; }
+.radar .ping { position: absolute; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--bad); left: 186px; top: 64px; animation: ping 1.4s cubic-bezier(.22,1,.36,1) infinite; }
+@keyframes ping { from { transform: scale(0.4); opacity: 1; } to { transform: scale(2.8); opacity: 0; } }
+.radar .scan { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, oklch(0 0 0 / 0.18) 0 1px, transparent 1px 3px); pointer-events: none; }
+.radar .shut { position: absolute; left: 0; right: 0; height: 9px; background: var(--c-mid); box-shadow: inset 0 -1px 0 oklch(0 0 0 / 0.5); }
+.radar .shut.t { top: 0; } .radar .shut.b { bottom: 0; box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.2); }
+.radar .stat { position: absolute; left: 8px; bottom: 12px; font: 400 11px var(--mono); color: var(--glow); letter-spacing: 0.08em; }
+.modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.mb { display: flex; align-items: center; justify-content: center; gap: 6px; height: 34px; border-radius: var(--plate-r); font: 700 14px var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: oklch(0.92 0.01 90); }
+.mb svg { width: 16px; height: 16px; }
+.mb.on { box-shadow: inset 0 0 0 1px var(--glow), inset 0 2px 6px oklch(0 0 0 / 0.6); background: var(--c-deep); color: var(--glow); }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.tab { height: 40px; display: grid; place-items: center; position: relative; border-radius: var(--plate-r) var(--plate-r) 0 0; color: oklch(0.82 0.01 90); }
+.tab svg { width: 22px; height: 22px; }
+.tab.on { background: var(--c-deep); color: var(--glow); box-shadow: inset 0 2px 0 var(--glow); }
+.tab .dot { position: absolute; top: 5px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+.tab .ring { position: absolute; top: 4px; right: 5px; width: 11px; height: 11px; border-radius: 50%; background: conic-gradient(var(--glow) 0 62%, oklch(0.3 0.01 250) 0); -webkit-mask: radial-gradient(circle, transparent 2.5px, #000 3px); mask: radial-gradient(circle, transparent 2.5px, #000 3px); }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; align-content: start; padding: 5px; overflow: hidden; margin-top: -8px; border-radius: 0 0 var(--plate-r) var(--plate-r); }
+
+/* ---------- Cameo (shared by HUD and the states strip) ---------- */
+.cameo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: max(0px, calc(var(--plate-r) - 4px)); background: oklch(0.2 0.01 250); box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.8), 0 0 0 1px oklch(1 0 0 / 0.07); }
+.cameo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(var(--z, 1.55)); transform-origin: 50% 66%; }
+.cameo .nm { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 6px 3px; font: 600 13px/1 var(--display); letter-spacing: 0.05em; text-transform: uppercase; background: linear-gradient(transparent, oklch(0.08 0.01 250 / 0.92) 55%); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cameo .pr { position: absolute; top: 4px; right: 5px; font: 400 12px var(--mono); color: var(--glow); text-shadow: 0 1px 2px #000, 0 0 2px #000; }
+.cameo .wipe { position: absolute; inset: 0; background: conic-gradient(from 0deg, transparent 0 var(--p), oklch(0.06 0.01 250 / 0.66) var(--p) 100%); }
+.cameo .wipe::after { content: ''; position: absolute; left: 50%; top: 50%; width: 1px; height: 60%; background: var(--glow); transform-origin: 0 0; transform: rotate(calc(var(--p) - 180deg)); opacity: 0.85; }
+.cameo .tm { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); font: 400 17px var(--mono); color: oklch(0.97 0.01 90); text-shadow: 0 0 4px #000, 0 1px 2px #000; }
+.cameo .q { position: absolute; top: 3px; left: 5px; font: 800 18px/1 var(--display); text-shadow: 0 1px 2px #000; }
+.cameo .plate { position: absolute; left: 6px; right: 6px; top: 34%; text-align: center; font: 800 14px var(--display); letter-spacing: 0.24em; padding: 3px 0 2px; }
+.cameo.ready .plate { color: oklch(0.15 0.02 145); background: var(--ok); box-shadow: 0 0 14px oklch(from var(--ok) l c h / 0.7); animation: readyp 1.1s cubic-bezier(.22,1,.36,1) infinite; }
+@keyframes readyp { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+.cameo.ready { box-shadow: inset 0 0 0 2px var(--ok), 0 0 12px oklch(from var(--ok) l c h / 0.4); }
+.cameo.hold .plate { color: oklch(0.18 0.03 90); background: repeating-linear-gradient(-45deg, var(--warn) 0 8px, oklch(0.72 0.14 90) 8px 16px); }
+.cameo.hold .wipe::after { display: none; }
+.cameo.locked img { filter: grayscale(1) brightness(0.45) contrast(0.9); }
+.cameo.locked .lk { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); width: 22px; height: 22px; color: oklch(0.78 0.01 250); }
+.cameo.locked .nm { color: oklch(0.6 0.01 250); }
+.cameo.poor .pr { color: var(--bad); }
+.cameo.poor img { filter: saturate(0.55) brightness(0.8); }
+.cameo.press { transform: translateY(1px); box-shadow: inset 0 0 0 2px var(--glow), inset 0 3px 10px oklch(0 0 0 / 0.8); }
+.cameo.hover { box-shadow: inset 0 0 0 1px var(--glow), 0 0 0 1px oklch(from var(--glow) l c h / 0.4); }
+@media (prefers-reduced-motion: reduce) { .cameo.ready .plate, .radar .ping, .odo b.roll, .pulse { animation: none !important; } }
+
+.info { padding: 9px 11px; border-radius: var(--plate-r); font-size: 13px; line-height: 1.4; }
+.info h5 { margin: 0; font: 700 18px var(--display); letter-spacing: 0.05em; text-transform: uppercase; color: var(--glow); }
+.info .kv { display: flex; gap: 12px; font: 400 13px var(--mono); color: oklch(0.88 0.01 90); margin: 3px 0 5px; }
+.info .kv span { display: flex; gap: 4px; align-items: center; }
+.info p { margin: 0 0 4px; color: oklch(0.86 0.01 90); }
+.info .req { color: oklch(0.82 0.13 40); }
+.info .keys { font: 400 11px var(--mono); color: oklch(0.7 0.01 250); }
+
+/* ================= States strip ================= */
+.states { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 18px; margin-top: 24px; }
+.states figure { margin: 0; }
+.states .cameo { --z: 1.5; }
+.states figcaption { margin-top: 10px; font-size: 14px; color: var(--ink-2); line-height: 1.45; }
+.states figcaption b { display: block; font: 700 15px var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); }
+@media (max-width: 860px) { .states { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ================= Announcer ================= */
+.lanes { margin-top: 26px; border: 1px solid var(--line); background: var(--ground-2); overflow-x: auto; }
+.lanes-in { min-width: 900px; display: grid; grid-template-columns: 112px 1fr; }
+.lanes .lh { font: 600 13px var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); padding: 0 12px; display: flex; align-items: center; border-top: 1px solid var(--line); height: 64px; }
+.lanes .lt { position: relative; border-top: 1px solid var(--line); height: 64px; }
+.lanes .axis { position: relative; height: 30px; }
+.lanes .axis span { position: absolute; top: 8px; transform: translateX(-50%); font: 400 12px var(--mono); color: var(--ink-3); }
+.lanes .ev { position: absolute; top: 9px; transform: translateX(-4px); font-size: 13px; line-height: 1.25; max-width: 122px; padding-left: 12px; }
+.lanes .ev::before { content: ''; position: absolute; left: 0; top: 4px; width: 7px; height: 7px; transform: rotate(45deg); background: var(--signal); }
+.lanes .ev.v { font-family: var(--display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-size: 14px; }
+.lanes .ev.v::before { background: var(--info); }
+.lanes .ev.a::before { background: var(--bad); }
+.lanes .ev.a { color: oklch(0.82 0.12 30); }
+.chain { display: flex; flex-wrap: wrap; align-items: center; gap: 0; margin-top: 26px; }
+.chain div { padding: 12px 14px; border: 1px solid var(--line); background: var(--ground-2); font-size: 14px; line-height: 1.3; }
+.chain div b { display: block; font: 700 14px var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--signal); }
+.chain .arr { border: 0; background: none; padding: 0 8px; color: var(--ink-3); font-family: var(--mono); }
+.voices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 26px; border-top: 1px solid var(--line); }
+.voices > div { padding: 16px 18px 6px 0; }
+.voices > div + div { padding-left: 18px; border-left: 1px solid var(--line); }
+.voices .fx { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.voices .fx svg { width: 28px; height: 28px; color: var(--glow); }
+.voices q { display: block; font: 600 17px var(--display); text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink); quotes: none; margin: 2px 0; }
+.voices small { color: var(--ink-2); font-size: 14px; }
+@media (max-width: 860px) { .voices { grid-template-columns: 1fr; } .voices > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); } }
+table.lines { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tablewrap { overflow-x: auto; margin-top: 26px; border: 1px solid var(--line); }
+table.lines th { text-align: left; font: 600 13px var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); padding: 10px 12px; background: var(--ground-2); border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.lines td { padding: 9px 12px; border-bottom: 1px solid oklch(0.26 0.01 250); vertical-align: top; }
+table.lines td:first-child { font: 600 15px var(--display); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+table.lines .p { font-family: var(--mono); white-space: nowrap; }
+.pri { display: inline-block; font: 600 12px var(--display); letter-spacing: 0.12em; text-transform: uppercase; padding: 1px 7px; border: 1px solid currentColor; }
+.pri.hi { color: var(--bad); } .pri.md { color: var(--warn); } .pri.lo { color: var(--ink-3); }
+
+/* ================= Battlefield details ================= */
+.details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px 22px; margin-top: 26px; }
+.details figure { margin: 0; }
+.details .tile { aspect-ratio: 4 / 3; border: 1px solid var(--line); background: oklch(0.42 0.07 128); background-image: radial-gradient(oklch(0.46 0.08 128) 1px, transparent 1.5px), radial-gradient(oklch(0.38 0.06 125) 1px, transparent 1.5px); background-size: 7px 7px, 11px 11px; position: relative; overflow: hidden; }
+.details .tile svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.details figcaption { margin-top: 10px; font-size: 14px; color: var(--ink-2); }
+.details figcaption b { display: block; font: 700 16px var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); margin-bottom: 2px; }
+@media (max-width: 860px) { .details { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .details { grid-template-columns: 1fr; } }
+.cursors { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 0; margin-top: 26px; border: 1px solid var(--line); background: var(--ground-2); }
+.cursors div { display: grid; justify-items: center; gap: 6px; padding: 16px 4px 12px; font: 600 12px var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); text-align: center; }
+.cursors div + div { border-left: 1px solid var(--line); }
+.cursors svg { width: 36px; height: 36px; }
+@media (max-width: 860px) { .cursors { grid-template-columns: repeat(5, minmax(0, 1fr)); } .cursors div:nth-child(6) { border-left: 0; } .cursors div:nth-child(n+6) { border-top: 1px solid var(--line); } }
+
+/* ================= Tablet ================= */
+.tabwrap { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 36px; align-items: start; margin-top: 26px; }
+@media (max-width: 860px) { .tabwrap { grid-template-columns: 1fr; } }
+.tablet { width: 1180px; height: 820px; position: relative; overflow: hidden; border-radius: 0; }
+.tablet .field { right: 0; background-position: -60px -90px; }
+.drawer { position: absolute; top: 0; right: 0; bottom: 0; width: 360px; display: grid; grid-template-columns: 34px 1fr; z-index: 4; transform: translateX(0); }
+.drawer .handle { display: grid; grid-template-rows: auto 1fr auto; justify-items: center; padding: 14px 0; gap: 10px; border-radius: 12px 0 0 12px; }
+.drawer .handle .grip { width: 6px; height: 60px; border-radius: 3px; background: repeating-linear-gradient(0deg, oklch(1 0 0 / 0.35) 0 3px, transparent 3px 7px); align-self: center; }
+.drawer .col { padding: 12px 14px; display: grid; grid-template-rows: auto auto 1fr; gap: 10px; }
+.drawer .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 0; }
+.drawer .cameo .nm { font-size: 15px; }
+.tcmd { position: absolute; left: 16px; bottom: 16px; z-index: 3; display: flex; gap: 8px; }
+.tcmd .ord { width: 76px; height: 76px; border-radius: var(--plate-r); font-size: 14px; }
+.tcmd .ord svg { width: 32px; height: 32px; }
+.modeT { position: absolute; left: 16px; top: 16px; z-index: 3; display: flex; padding: 4px; gap: 4px; border-radius: var(--plate-r); }
+.modeT b { font: 700 17px var(--display); letter-spacing: 0.14em; text-transform: uppercase; padding: 12px 18px; }
+.modeT b.on { background: var(--c-deep); color: var(--glow); box-shadow: inset 0 0 0 1px var(--glow); }
+.touchdot { position: absolute; width: 56px; height: 56px; border-radius: 50%; border: 2px solid oklch(1 0 0 / 0.8); background: oklch(1 0 0 / 0.15); z-index: 3; }
+.gest { list-style: none; padding: 0; margin: 0; }
+.gest li { display: grid; grid-template-columns: 150px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.gest li b { font: 700 15px var(--display); letter-spacing: 0.08em; text-transform: uppercase; }
+.bps { margin-top: 18px; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.bps div { display: grid; grid-template-columns: 150px 1fr; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.bps .mono { color: var(--signal); font-size: 14px; }
+
+/* ================= Shell ================= */
+.shell { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; margin-top: 26px; }
+.shell figure { margin: 0; }
+.shell figcaption { margin-top: 10px; font-size: 14px; color: var(--ink-2); }
+.shell figcaption b { display: block; font: 700 16px var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
+@media (max-width: 960px) { .shell { grid-template-columns: 1fr; } }
+.scr { width: 1280px; height: 800px; position: relative; overflow: hidden; background: #0b0d10; }
+.scr .bg { position: absolute; inset: 0; background: url(img/field.jpg) -40px -60px / 1600px 1000px no-repeat; filter: saturate(0.6) brightness(0.45); }
+.scr .bg.blur { filter: saturate(0.4) brightness(0.3) blur(3px); }
+.menu-panel { position: absolute; right: 90px; top: 90px; width: 420px; padding: 28px; display: grid; gap: 10px; border-radius: var(--plate-r); }
+.logo { font: 800 92px/0.84 var(--display); text-transform: uppercase; letter-spacing: -0.01em; color: oklch(0.95 0.01 90); margin: 0 0 6px; text-shadow: 0 3px 0 oklch(0 0 0 / 0.5); }
+.logo span { display: block; color: var(--glow); }
+.mbtn { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font: 700 26px var(--display); letter-spacing: 0.16em; text-transform: uppercase; border-radius: var(--plate-r); }
+.mbtn small { font: 400 15px var(--mono); color: oklch(0.8 0.01 250); letter-spacing: 0; }
+.mbtn.primary { background: var(--glow); color: oklch(0.15 0.02 250); box-shadow: inset 0 -3px 0 oklch(0 0 0 / 0.25), 0 0 24px oklch(from var(--glow) l c h / 0.4); }
+.ver { position: absolute; left: 40px; bottom: 30px; font: 400 18px var(--mono); color: oklch(0.7 0.01 250); }
+.attract { position: absolute; left: 40px; top: 40px; font: 600 18px var(--display); letter-spacing: 0.2em; text-transform: uppercase; color: oklch(0.85 0.01 90); display: flex; gap: 10px; align-items: center; }
+.attract i { width: 12px; height: 12px; border-radius: 50%; background: var(--bad); box-shadow: 0 0 10px var(--bad); }
+.lobby { position: absolute; inset: 50px 60px; display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+.lobby .slots { display: grid; gap: 8px; align-content: start; padding: 22px; border-radius: var(--plate-r); }
+.lobby h6, .score h6 { margin: 0 0 8px; font: 800 44px var(--display); text-transform: uppercase; letter-spacing: 0.04em; }
+.slot { display: grid; grid-template-columns: 44px 1fr 180px 90px 130px; gap: 12px; align-items: center; height: 70px; padding: 0 14px; font: 600 22px var(--display); letter-spacing: 0.06em; text-transform: uppercase; border-radius: var(--plate-r); }
+.slot .sw { width: 30px; height: 30px; border-radius: 2px; box-shadow: inset 0 0 0 2px oklch(0 0 0 / 0.4); }
+.slot .dd { font: 500 19px var(--body); text-transform: none; letter-spacing: 0; color: oklch(0.88 0.01 90); display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; }
+.slot .dd::after { content: '▾'; color: var(--glow); }
+.lobby .mapcol { display: grid; gap: 12px; align-content: start; padding: 20px; border-radius: var(--plate-r); }
+.lobby .mapcol .well { height: 220px; display: grid; place-items: center; overflow: hidden; }
+.lobby .mapcol img { width: 340px; }
+.lobby .opt { font: 500 19px var(--body); display: flex; justify-content: space-between; padding: 6px 2px; border-bottom: 1px solid oklch(1 0 0 / 0.1); }
+.lobby .opt b { font: 400 19px var(--mono); color: var(--glow); font-weight: 400; }
+.score { position: absolute; inset: 60px 110px; padding: 34px 40px; display: grid; gap: 22px; align-content: start; border-radius: var(--plate-r); }
+.score .banner { font: 800 78px/0.9 var(--display); text-transform: uppercase; color: var(--glow); letter-spacing: 0.02em; }
+.score .banner small { display: block; font: 600 24px var(--display); letter-spacing: 0.2em; color: oklch(0.85 0.01 90); }
+.tally { display: grid; gap: 14px; }
+.tally .row { display: grid; grid-template-columns: 220px 1fr 130px; gap: 18px; align-items: center; font: 600 22px var(--display); letter-spacing: 0.08em; text-transform: uppercase; }
+.tally .bar { height: 26px; display: flex; gap: 3px; }
+.tally .bar i { flex: 0 0 9px; background: var(--glow); }
+.tally .bar.en i { background: var(--bad); }
+.tally .row b { font: 400 28px var(--mono); text-align: right; font-weight: 400; }
+.rank { display: flex; gap: 18px; align-items: center; font: 700 26px var(--display); letter-spacing: 0.14em; text-transform: uppercase; }
+.rank svg { width: 60px; height: 60px; color: var(--glow); }
+
+/* ================= Roadmap ================= */
+.road { list-style: none; margin: 26px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.road li { display: grid; grid-template-columns: 92px minmax(0, 1fr) minmax(0, 1fr); gap: 22px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.road .n { font: 800 46px/0.9 var(--display); color: var(--signal); }
+.road .n small { display: block; font: 600 12px var(--display); letter-spacing: 0.18em; color: var(--ink-3); margin-top: 6px; }
+.road h3 { margin-bottom: 6px; }
+.road p { color: var(--ink-2); font-size: 15px; margin: 0; }
+.road .done { font-size: 14px; color: var(--ink-2); }
+.road .done b { display: block; font: 600 13px var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--ok); margin-bottom: 2px; }
+@media (max-width: 760px) { .road li { grid-template-columns: 60px minmax(0, 1fr); } .road .done { grid-column: 2; } .road .n { font-size: 36px; } }
+.open { margin-top: 26px; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.open div { padding: 12px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 26px 1fr; gap: 8px; }
+.open div::before { content: '✓'; font: 800 20px/1 var(--display); color: var(--signal); }
+footer { margin-top: 64px; font: 400 13px var(--mono); color: var(--ink-3); }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Original geometric emblems: no existing faction marks were referenced. -->
+    <symbol id="em-allies" viewBox="0 0 48 48"><path d="M24 3 43 12v13c0 10-8 17-19 20C13 42 5 35 5 25V12Z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M12 27l12-8 12 8M12 35l12-8 12 8" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="miter"/><path d="M24 8v8" stroke="currentColor" stroke-width="2.5"/></symbol>
+    <symbol id="em-soviets" viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" fill="none" stroke="currentColor" stroke-width="6" stroke-dasharray="5.2 3.7"/><circle cx="24" cy="24" r="12" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M15 20h18v6H15zM21 26h6v8h-6z" fill="currentColor"/></symbol>
+    <symbol id="em-psi" viewBox="0 0 48 48"><path d="M24 4 44 40H4Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M14 33a10 10 0 0 1 20 0M18 33a6 6 0 0 1 12 0" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="24" cy="21" r="3.2" fill="currentColor"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.5 3.5a5 5 0 0 0-5.6 6.7L3 16.1 7.9 21l5.9-5.9a5 5 0 0 0 6.7-5.6l-3.1 3.1-3.4-.9-.9-3.4Z" fill="currentColor"/></symbol>
+    <symbol id="i-sell" viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c-1-1.3-2.8-2-5-2-3 0-5 1.5-5 3.6 0 5 10 2.6 10 7.7 0 2.1-2 3.7-5 3.7-2.4 0-4.4-.9-5.4-2.4" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M14 2 4 14h7l-1 8 10-12h-7Z" fill="currentColor"/></symbol>
+    <symbol id="i-struct" viewBox="0 0 24 24"><path d="M3 21V10l6-4v4l6-4v4l6-4v15Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 15h2m4 0h2" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-def" viewBox="0 0 24 24"><path d="M5 21v-9h14v9ZM8 12V7h8v5M12 7V2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-inf" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.6" fill="currentColor"/><path d="M8 22l1.5-8L8 10l4-1.5 4 1.5-1.5 4L16 22M12 9v5" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+    <symbol id="i-veh" viewBox="0 0 24 24"><path d="M2 15h20v4H2zM5 15l2-5h9l2 5M12 10V7h9" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="1" fill="currentColor"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
+    <symbol id="i-am" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5" stroke="currentColor" stroke-width="2"/><path d="M3 21l4-4" stroke="currentColor" stroke-width="2.4"/></symbol>
+    <symbol id="i-guard" viewBox="0 0 24 24"><path d="M12 2 20 5v7c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V5Z" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><path d="M8 2h8l6 6v8l-6 6H8l-6-6V8Z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8 12h8" stroke="currentColor" stroke-width="2.6"/></symbol>
+    <symbol id="i-scatter" viewBox="0 0 24 24"><path d="M12 12 4 4m8 8 8-8m-8 8-8 8m8-8 8 8M4 4h5M4 4v5M20 4h-5M20 4v5M4 20h5M4 20v-5M20 20h-5M20 20v-5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-deploy" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+    <symbol id="i-speak" viewBox="0 0 24 24"><path d="M3 9h4l5-4v14l-5-4H3Z" fill="currentColor"/><path d="M15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+<header class="mast">
+  <div>
+    <p class="tag">IRON FRONT · UX-VOORSTEL · FASES 14–19 · V1.1.0 → V1.2.0</p>
+    <h1>Command <span>Console</span></h1>
+  </div>
+  <div>
+    <p class="lede">Van een nette webinterface naar een zware commandoconsole die per factie anders aanvoelt, een omroepstem die alles meldt, en een slagveld dat je onder vuur in één blik leest.</p>
+    <dl class="decisions">
+      <div><dt>Scope</dt><dd style="margin:0">HUD & sidebar, announcer & feedback, menu/lobby/score, leesbaarheid slagveld</dd></div>
+      <div><dt>Anker</dt><dd style="margin:0">RA2/YR-gevoel met factie-skin, volledig eigen ontwerp</dd></div>
+      <div><dt>Taal</dt><dd style="margin:0">Engels in het spel, Nederlands in de documentatie</dd></div>
+      <div><dt>Stem</dt><dd style="margin:0">Offline TTS (open licentie) + radiofilter</dd></div>
+      <div><dt>Schermen</dt><dd style="margin:0">Grote monitoren tot tablets met touch</dd></div>
+    </dl>
+  </div>
+</header>
+
+<section id="nu">
+  <p class="eyebrow">Uitgangspunt <b>v1.1.0</b></p>
+  <h2>Wat er nu staat</h2>
+  <div class="before">
+    <figure>
+      <img src="img/before.jpg" alt="Huidige HUD van Iron Front: grijze sidebar met kleine donkere cameo's en een leeg radarvak">
+      <figcaption>Skirmish, 0:01, huidige build</figcaption>
+    </figure>
+    <ol class="issues">
+      <li><span><b>Geen factie in de chrome.</b> Elke factie krijgt hetzelfde grijze paneel met een goudaccent; het voelt als een dashboard, niet als een legerconsole.</span></li>
+      <li><span><b>Cameo's lezen slecht.</b> Het model is klein in een donker vlak, voortgang is een verticale vulling, en "on hold" bestaat visueel niet.</span></li>
+      <li><span><b>Het spel zwijgt bijna.</b> De announcer gebruikt de browserstem, die per OS anders klinkt; meldingen staan als tekstregels linksboven.</span></li>
+      <li><span><b>Twee talen door elkaar.</b> <span class="mono">GEBOUWEN</span>, <span class="mono">Repair</span>, <span class="mono">GEREED</span>, <span class="mono">Our base is under attack</span>, <span class="mono">NEDERLAAG</span>.</span></li>
+      <li><span><b>Kale randen.</b> Harde zwarte kaartrand, een leeg radarvak, een formulier als lobby en een tabel als eindscherm.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="hud">
+  <p class="eyebrow">Fase 14–15 <b>1440 × 900</b></p>
+  <h2>De HUD als factie-console</h2>
+  <p>De sidebar blijft rechts, de radar bovenaan en de cameo's in twee kolommen: precies waar genrespelers ze zoeken. Wat verandert is het materiaal (plaatstaal, klinknagels, glas), de feedback (de credits rollen, de radar heeft luiken, de cameo's hebben een clock-wipe) en de verdeling: bevelen gaan naar een commandobalk onder het slagveld, zodat de sidebar alleen nog over bouwen gaat. Wissel van factie om het materiaal te zien veranderen.</p>
+  <div class="switch" role="group" aria-label="Factie">
+    <button type="button" data-f="allies" aria-pressed="true"><i style="background:oklch(0.62 0.05 240)"></i>Allied Coalition</button>
+    <button type="button" data-f="soviets" aria-pressed="false"><i style="background:oklch(0.5 0.13 30)"></i>Red Bloc</button>
+    <button type="button" data-f="psi" aria-pressed="false"><i style="background:oklch(0.5 0.14 310)"></i>Psi Directorate</button>
+  </div>
+  <div class="stage" data-w="1440" data-h="900">
+    <div class="screen hud fx" data-faction="allies" id="hud-screen">
+      <div class="field"></div>
+
+      <div class="swt">
+        <div><i></i><span>Storm Engine<small>Your superweapon</small></span><em>04:12</em></div>
+        <div class="enemy"><i></i><span>Hammer Silo<small>General Kova</small></span><em>01:37</em></div>
+      </div>
+      <div class="subs" aria-hidden="true">
+        <p class="old"><svg width="16" height="16"><use href="#i-speak"/></svg>Construction complete</p>
+        <p class="old"><svg width="16" height="16"><use href="#i-speak"/></svg>Unit ready</p>
+        <p class="alert"><svg width="16" height="16"><use href="#i-speak"/></svg>Our harvester is under attack</p>
+      </div>
+
+      <div class="topstrip">
+        <div class="metal clock">12:47</div>
+        <div class="metal spd"><b>½</b><b class="on">1×</b><b>1½</b><b>2×</b></div>
+        <div class="metal">Options</div>
+      </div>
+
+      <!-- selected group: brackets + pips + veterancy -->
+      <div class="brk" style="left:610px;top:526px"><div class="pips"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="brk" style="left:652px;top:505px"><div class="pips"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="off"></i></div><span class="vet">︿︿</span></div>
+      <div class="brk" style="left:694px;top:527px"><div class="pips"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="brk" style="left:652px;top:548px"><div class="pips"><i></i><i></i><i></i><i></i><i style="background:var(--warn)"></i><i class="off"></i><i class="off"></i><i class="off"></i></div></div>
+      <svg class="orderline" style="left:700px;top:330px" width="330" height="230" viewBox="0 0 330 230" aria-hidden="true">
+        <path d="M2 222 L300 30" stroke="oklch(0.66 0.21 28)" stroke-width="2.5" stroke-dasharray="8 6" fill="none" opacity="0.9"/>
+        <g transform="translate(300 30)"><circle r="13" fill="none" stroke="oklch(0.66 0.21 28)" stroke-width="2.5"/><path d="M0 -20v9M0 11v9M-20 0h9M11 0h9" stroke="oklch(0.66 0.21 28)" stroke-width="2.5"/></g>
+      </svg>
+      <!-- placement ghost: 2x2 footprint, one blocked cell, defence range -->
+      <svg class="ghost" style="left:820px;top:520px" width="260" height="170" viewBox="0 0 260 170" aria-hidden="true">
+        <ellipse cx="130" cy="85" rx="124" ry="62" fill="oklch(0.84 0.12 205 / 0.06)" stroke="oklch(0.84 0.12 205 / 0.55)" stroke-width="1.5" stroke-dasharray="5 5"/>
+        <g stroke-width="1.5">
+          <path d="M130 53 162 69 130 85 98 69Z" fill="oklch(0.78 0.18 145 / 0.35)" stroke="oklch(0.78 0.18 145)"/>
+          <path d="M162 69 194 85 162 101 130 85Z" fill="oklch(0.78 0.18 145 / 0.35)" stroke="oklch(0.78 0.18 145)"/>
+          <path d="M98 69 130 85 98 101 66 85Z" fill="oklch(0.78 0.18 145 / 0.35)" stroke="oklch(0.78 0.18 145)"/>
+          <path d="M130 85 162 101 130 117 98 101Z" fill="oklch(0.66 0.21 28 / 0.45)" stroke="oklch(0.66 0.21 28)"/>
+        </g>
+      </svg>
+      <!-- rally flag at the factory -->
+      <svg class="orderline" style="left:420px;top:330px" width="40" height="50" viewBox="0 0 40 50" aria-hidden="true"><path d="M8 48V6" stroke="oklch(0.95 0.01 90)" stroke-width="2.5"/><path d="M9 6h22l-6 7 6 7H9Z" fill="var(--team)" stroke="oklch(0.95 0.01 90)" stroke-width="1.5"/></svg>
+
+      <div class="cmdbar">
+        <div class="portrait metal"><div class="well"><img data-cmd-img alt=""><b>×4</b></div></div>
+        <div class="unit metal">
+          <h4 data-cmd-name>Warden Tank</h4>
+          <div class="hp"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="y"></i><i class="o"></i></div>
+          <small>Veteran ×1 · Group 2</small>
+        </div>
+        <div class="orders metal">
+          <div class="ord on"><kbd>F</kbd><svg><use href="#i-am"/></svg>Atk-move</div>
+          <div class="ord"><kbd>G</kbd><svg><use href="#i-guard"/></svg>Guard</div>
+          <div class="ord"><kbd>X</kbd><svg><use href="#i-stop"/></svg>Stop</div>
+          <div class="ord"><kbd>C</kbd><svg><use href="#i-scatter"/></svg>Scatter</div>
+          <div class="ord dis"><kbd>E</kbd><svg><use href="#i-deploy"/></svg>Deploy</div>
+        </div>
+      </div>
+
+      <aside class="side">
+        <div class="rail metal">
+          <svg><use href="#i-bolt"/></svg>
+          <div class="seg" aria-label="Power 240 of 300"><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="y mark"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <span class="lbl">240/300</span>
+        </div>
+        <div class="col metal">
+          <div class="crest well rivets">
+            <svg data-emblem><use href="#em-allies"/></svg>
+            <div>
+              <div class="fname" data-fname>Allied Coalition</div>
+              <div class="odo" aria-label="12,450 credits"><b>$</b><b>1</b><b>2</b><b class="sep">,</b><b>4</b><b>5</b><b class="roll">0</b></div>
+            </div>
+          </div>
+          <div class="radar metal rivets">
+            <div class="well"><img src="img/minimap.png" alt=""><div class="ping"></div><div class="scan"></div><div class="shut t"></div><div class="shut b"></div><span class="stat">RADAR ONLINE</span></div>
+          </div>
+          <div class="modes">
+            <div class="mb metal"><svg><use href="#i-wrench"/></svg>Repair</div>
+            <div class="mb metal"><svg><use href="#i-sell"/></svg>Sell</div>
+            <div class="mb metal"><svg><use href="#i-bolt"/></svg>Power</div>
+          </div>
+          <div class="tabs">
+            <div class="tab on metal" title="Structures"><svg><use href="#i-struct"/></svg><span class="ring"></span></div>
+            <div class="tab metal" title="Defense"><svg><use href="#i-def"/></svg></div>
+            <div class="tab metal" title="Infantry"><svg><use href="#i-inf"/></svg><span class="dot"></span></div>
+            <div class="tab metal" title="Vehicles"><svg><use href="#i-veh"/></svg></div>
+          </div>
+          <div class="grid well" data-grid></div>
+          <div class="info well" data-info></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+  <div class="note-row">
+    <span data-n="A">Superwapen-timers, ook die van de vijand</span>
+    <span data-n="B">Ondertitels van de announcer, vervagend</span>
+    <span data-n="C">Hoekhaken, hp-pips, veteranie</span>
+    <span data-n="D">Orderlijn, rally-vlag, plaatsingsraster</span>
+    <span data-n="E">Commandobalk met sneltoetsen</span>
+    <span data-n="F">Credits-rol, radarluiken, stroomrail</span>
+  </div>
+</section>
+
+<section id="cameos">
+  <p class="eyebrow">Fase 15 <b>cameo-staten</b></p>
+  <h2>Een cameo vertelt alles</h2>
+  <p>Elke staat heeft een eigen vorm, niet alleen een kleur. De voortgang loopt als een klok (zoals in het genre) met de resterende tijd erin. De render wordt per categorie ingezoomd, want nu vult een gebouw maar een derde van het vak.</p>
+  <div class="states fx" data-faction="allies" id="states"></div>
+</section>
+
+<section id="stem">
+  <p class="eyebrow">Fase 16 <b>announcer & feedback</b></p>
+  <h2>Het slagveld spreekt</h2>
+  <p>Elke belangrijke gebeurtenis komt binnen via drie kanalen tegelijk: stem, geluid en beeld. Zo hoeft de speler nooit tekst te lezen om te weten wat er gebeurde. Hieronder de eerste veertig seconden van een potje.</p>
+  <div class="lanes" role="img" aria-label="Tijdlijn van de eerste 40 seconden: stem, geluid en beeld per gebeurtenis">
+    <div class="lanes-in">
+      <div></div>
+      <div class="axis"><span style="left:2%">0:00</span><span style="left:25%">0:10</span><span style="left:50%">0:20</span><span style="left:75%">0:30</span><span style="left:97%">0:40</span></div>
+      <div class="lh">Stem</div>
+      <div class="lt"><span class="ev v" style="left:1%">Battle control online</span><span class="ev v" style="left:17%">Building</span><span class="ev v" style="left:35%">Construction complete</span><span class="ev v" style="left:57%">Unit ready</span><span class="ev v a" style="left:77%">Harvester under attack</span></div>
+      <div class="lh">Geluid</div>
+      <div class="lt"><span class="ev" style="left:1%">Radio-squelch, muziek start</span><span class="ev" style="left:17%">Cameo-klik</span><span class="ev" style="left:35%">Gong + plaats-thunk</span><span class="ev" style="left:57%">Fabriekssirene</span><span class="ev a" style="left:77%">Alarm, muziek −6 dB</span></div>
+      <div class="lh">Beeld</div>
+      <div class="lt"><span class="ev" style="left:1%">Radarluiken dicht</span><span class="ev" style="left:17%">Clock-wipe start</span><span class="ev" style="left:35%">READY-plaat, stofwolk</span><span class="ev" style="left:57%">Eenheid rijdt naar rally-vlag</span><span class="ev a" style="left:77%">Rode ping, spatie springt erheen</span></div>
+    </div>
+  </div>
+
+  <div class="voices">
+    <div><div class="fx" data-faction="allies"><svg><use href="#em-allies"/></svg><h3>AEGIS · Allied</h3></div><q>"Construction complete."</q><small>Kalm en zakelijk, een vrouwelijke stem. Schone radiofilter, korte squelch.</small></div>
+    <div><div class="fx" data-faction="soviets"><svg><use href="#em-soviets"/></svg><h3>KOMMAND · Red Bloc</h3></div><q>"Unit ready. Move out."</q><small>Bars en laag. Meer saturatie, een veldradio met ruis.</small></div>
+    <div><div class="fx" data-faction="psi"><svg><use href="#em-psi"/></svg><h3>CHOIR · Psi</h3></div><q>"The mind is prepared."</q><small>Gefluisterd met een korte echo; de squelch is vervangen door een zachte toon.</small></div>
+  </div>
+
+  <div class="chain" aria-label="Signaalketen van de stem">
+    <div><b>Piper TTS</b>Offline gerenderd, alleen een stem met MIT/CC0/CC-BY</div><span class="arr">→</span>
+    <div><b>.ogg</b>±30 regels per factie, in het asset-register</div><span class="arr">→</span>
+    <div><b>Bandpass</b>300–3400 Hz</div><span class="arr">→</span>
+    <div><b>Saturatie</b>Per factie</div><span class="arr">→</span>
+    <div><b>Squelch</b>Klik in en uit</div><span class="arr">→</span>
+    <div><b>Voice-bus</b>Muziek duckt −6 dB</div>
+  </div>
+
+  <div class="tablewrap">
+    <table class="lines">
+      <thead><tr><th>Regel</th><th>Trigger</th><th>Prioriteit</th><th>Cooldown</th><th>Beeld</th></tr></thead>
+      <tbody>
+        <tr><td>Our base is under attack</td><td>Eigen gebouw krijgt schade, buiten beeld</td><td><span class="pri hi">Hoog</span></td><td class="p">8 s / gebied</td><td>Rode minimap-ping, spatie springt erheen</td></tr>
+        <tr><td>Superweapon detected</td><td>Vijand bouwt een superwapengebouw</td><td><span class="pri hi">Hoog</span></td><td class="p">eenmalig</td><td>Rode timer linksboven</td></tr>
+        <tr><td>Construction complete</td><td>Gebouw klaar om te plaatsen</td><td><span class="pri md">Midden</span></td><td class="p">geen</td><td>READY-plaat, tab-stip</td></tr>
+        <tr><td>Unit ready</td><td>Eenheid verlaat de fabriek</td><td><span class="pri md">Midden</span></td><td class="p">2 s, gebundeld</td><td>Eenheid naar rally-vlag</td></tr>
+        <tr><td>Low power</td><td>Verbruik groter dan productie</td><td><span class="pri md">Midden</span></td><td class="p">20 s</td><td>Rail knippert, gebouwen gedimd</td></tr>
+        <tr><td>Insufficient funds</td><td>Productie stokt op $0</td><td><span class="pri lo">Laag</span></td><td class="p">15 s</td><td>Credits flitsen rood</td></tr>
+        <tr><td>Unit promoted</td><td>Veteranie-stap</td><td><span class="pri lo">Laag</span></td><td class="p">5 s</td><td>Chevron-flits boven de eenheid</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="slagveld">
+  <p class="eyebrow">Fase 17 <b>leesbaarheid</b></p>
+  <h2>Lezen onder vuur</h2>
+  <p>Eén vaste beeldtaal voor selectie, gezondheid en bevelen. Kleur draagt nooit de betekenis alleen: vijanden hebben gestreepte balken, en schade lees je ook af aan het aantal pips.</p>
+  <div class="details">
+    <figure>
+      <div class="tile"><svg viewBox="0 0 240 180" aria-hidden="true">
+        <g fill="none" stroke="oklch(0.96 0.01 90)" stroke-width="3"><path d="M70 66h14M70 66v12M170 66h-14M170 66v12M70 132h14M70 132v-12M170 132h-14M170 132v-12"/></g>
+        <path d="M92 112l28-14 28 14-28 14z" fill="oklch(0.45 0.06 250)"/><path d="M98 104l22-11 22 11-22 11z" fill="oklch(0.6 0.12 255)"/><rect x="117" y="90" width="22" height="5" fill="oklch(0.35 0.03 250)"/>
+        <g>
+          <rect x="70" y="52" width="9" height="7" fill="oklch(0.78 0.18 145)"/><rect x="81" y="52" width="9" height="7" fill="oklch(0.78 0.18 145)"/><rect x="92" y="52" width="9" height="7" fill="oklch(0.78 0.18 145)"/><rect x="103" y="52" width="9" height="7" fill="oklch(0.78 0.18 145)"/><rect x="114" y="52" width="9" height="7" fill="oklch(0.78 0.18 145)"/><rect x="125" y="52" width="9" height="7" fill="oklch(0.84 0.16 92)"/><rect x="136" y="52" width="9" height="7" fill="oklch(0.3 0.01 250)"/><rect x="147" y="52" width="9" height="7" fill="oklch(0.3 0.01 250)"/>
+        </g>
+        <text x="160" y="59" font-family="Barlow Condensed, sans-serif" font-weight="800" font-size="13" fill="oklch(0.96 0.01 90)">2</text>
+        <path d="M172 44l6-5 6 5M172 50l6-5 6 5" fill="none" stroke="oklch(0.84 0.16 92)" stroke-width="2.4"/>
+      </svg></div>
+      <figcaption><b>Selectie</b>Hoekhaken, 8 hp-pips, groepsnummer en veteranie-chevrons. Infanterie houdt een kleine ellips.</figcaption>
+    </figure>
+    <figure>
+      <div class="tile"><svg viewBox="0 0 240 180" aria-hidden="true">
+        <path d="M40 140 L120 90" stroke="oklch(0.78 0.18 145)" stroke-width="2.5" stroke-dasharray="7 5"/>
+        <path d="M120 90 L200 50" stroke="oklch(0.78 0.18 145)" stroke-width="2.5" stroke-dasharray="7 5" opacity="0.55"/>
+        <g fill="none" stroke="oklch(0.78 0.18 145)" stroke-width="2.5"><path d="M112 90l8-4 8 4-8 4z"/><path d="M192 50l8-4 8 4-8 4z"/></g>
+        <text x="132" y="96" font-family="Share Tech Mono, monospace" font-size="12" fill="oklch(0.96 0.01 90)">1</text><text x="212" y="56" font-family="Share Tech Mono, monospace" font-size="12" fill="oklch(0.96 0.01 90)">2</text>
+        <path d="M40 40 L150 140" stroke="oklch(0.66 0.21 28)" stroke-width="2.5" stroke-dasharray="7 5" opacity="0.7"/>
+        <g transform="translate(150 140)" stroke="oklch(0.66 0.21 28)" stroke-width="2.5" fill="none"><circle r="10"/><path d="M0-16v7M0 9v7M-16 0h7M9 0h7"/></g>
+      </svg></div>
+      <figcaption><b>Orderlijnen</b>Groen voor bewegen, rood voor aanvallen, geel voor bewaken. Ze vervagen in 0,6 s; met Shift blijven de waypoints genummerd staan.</figcaption>
+    </figure>
+    <figure>
+      <div class="tile"><svg viewBox="0 0 240 180" aria-hidden="true">
+        <path d="M60 95l50-25 50 25-50 25z" fill="oklch(0.42 0.02 250)"/><path d="M60 95v-30l50-25v30zM160 95v-30l-50-25v30z" fill="oklch(0.34 0.02 250)" opacity="0.85"/>
+        <path d="M60 65l50-25 50 25-50 25z" fill="oklch(0.5 0.02 250)" opacity="0.6"/>
+        <g opacity="0.92"><circle cx="110" cy="58" r="13" fill="oklch(0.2 0.03 250)" stroke="oklch(0.84 0.16 92)" stroke-width="2.5"/><path d="M113 48l-8 11h6l-2 9 8-11h-6z" fill="oklch(0.84 0.16 92)"/></g>
+        <rect x="74" y="130" width="72" height="20" fill="oklch(0.15 0.01 250 / 0.85)"/><text x="110" y="144" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="oklch(0.84 0.16 92)">OFFLINE</text>
+      </svg></div>
+      <figcaption><b>Stroomtekort</b>Het gebouw wordt gedimd en krijgt een bliksemicoon; verdediging zegt hardop dat ze OFFLINE is.</figcaption>
+    </figure>
+  </div>
+
+  <div class="cursors" aria-label="Cursorset">
+    <div><svg viewBox="0 0 36 36"><path d="M8 4v24l7-6 4 9 4-2-4-9h9Z" fill="oklch(0.96 0.01 90)" stroke="oklch(0.15 0.01 250)" stroke-width="1.5"/></svg>Select</div>
+    <div><svg viewBox="0 0 36 36" fill="none" stroke="oklch(0.78 0.18 145)" stroke-width="3"><path d="M6 6l6 6M30 6l-6 6M6 30l6-6M30 30l-6-6M6 6h5M6 6v5M30 6h-5M30 6v5M6 30h5M6 30v-5M30 30h-5M30 30v-5"/></svg>Move</div>
+    <div><svg viewBox="0 0 36 36" fill="none" stroke="oklch(0.66 0.21 28)" stroke-width="3"><circle cx="18" cy="18" r="9"/><path d="M18 3v7M18 26v7M3 18h7M26 18h7"/></svg>Attack</div>
+    <div><svg viewBox="0 0 36 36" fill="none" stroke="oklch(0.66 0.21 28)" stroke-width="3.2"><circle cx="18" cy="18" r="12"/><path d="M10 10l16 16"/></svg>No go</div>
+    <div><svg viewBox="0 0 36 36" fill="none" stroke="oklch(0.8 0.11 220)" stroke-width="3"><path d="M18 4v16M12 14l6 6 6-6M6 22v8h24v-8"/></svg>Enter</div>
+    <div><svg viewBox="0 0 36 36" fill="none" stroke="oklch(0.84 0.16 92)" stroke-width="3"><path d="M10 32V5M11 6h16l-4 6 4 6H11"/></svg>Capture</div>
+    <div><svg viewBox="0 0 36 36"><use href="#i-wrench" x="5" y="5" width="26" height="26" style="color:oklch(0.78 0.18 145)"/></svg>Repair</div>
+    <div><svg viewBox="0 0 36 36"><use href="#i-sell" x="5" y="5" width="26" height="26" style="color:oklch(0.84 0.16 92)"/></svg>Sell</div>
+    <div><svg viewBox="0 0 36 36" fill="none" stroke="oklch(0.8 0.11 220)" stroke-width="3"><path d="M18 18 8 8m10 10 10-10M18 18 8 28m10-10 10 10M8 8h6M8 8v6M28 8h-6M28 8v6M8 28h6M8 28v-6M28 28h-6M28 28v-6"/></svg>Deploy</div>
+    <div><svg viewBox="0 0 36 36" fill="none" stroke="oklch(0.76 0.2 340)" stroke-width="2.6"><circle cx="18" cy="18" r="14" stroke-dasharray="4 3"/><circle cx="18" cy="18" r="6"/><circle cx="18" cy="18" r="1.6" fill="oklch(0.76 0.2 340)"/></svg>Target</div>
+  </div>
+</section>
+
+<section id="tablet">
+  <p class="eyebrow">Fase 15 <b>1180 × 820 · touch</b></p>
+  <h2>Op een tablet</h2>
+  <div class="tabwrap">
+    <div class="stage" data-w="1180" data-h="820">
+      <div class="screen tablet fx" data-faction="allies" id="tab-screen">
+        <div class="field"></div>
+        <div class="modeT metal"><b>Select</b><b class="on">Order</b></div>
+        <div class="touchdot" style="left:560px;top:430px"></div>
+        <div class="tcmd">
+          <div class="ord metal on"><svg><use href="#i-am"/></svg>Atk-move</div>
+          <div class="ord metal"><svg><use href="#i-guard"/></svg>Guard</div>
+          <div class="ord metal"><svg><use href="#i-stop"/></svg>Stop</div>
+          <div class="ord metal"><svg><use href="#i-scatter"/></svg>Scatter</div>
+        </div>
+        <aside class="drawer">
+          <div class="handle metal"><svg width="20" height="20" style="color:var(--warn)"><use href="#i-bolt"/></svg><div class="grip"></div><span class="lbl" style="writing-mode:vertical-rl;transform:rotate(180deg);font:400 16px var(--mono);color:var(--glow)">$12,450</span></div>
+          <div class="col metal">
+            <div class="tabs">
+              <div class="tab on metal"><svg><use href="#i-struct"/></svg><span class="ring"></span></div>
+              <div class="tab metal"><svg><use href="#i-def"/></svg></div>
+              <div class="tab metal"><svg><use href="#i-inf"/></svg><span class="dot"></span></div>
+              <div class="tab metal"><svg><use href="#i-veh"/></svg></div>
+            </div>
+            <div class="grid well" data-tgrid style="margin-top:-10px"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <div>
+      <p>De sidebar wordt een lade aan de rand. De handgreep laat credits en stroom altijd zien; open zitten de cameo's in drie kolommen van minstens 64 px. Een expliciete <b>Select / Order</b>-schakelaar vervangt het verschil tussen links- en rechtsklik.</p>
+      <ul class="gest">
+        <li><b>Tik</b><span>Selecteren, of een bevel in Order-modus</span></li>
+        <li><b>Lang drukken + slepen</b><span>Sleepselectie</span></li>
+        <li><b>Twee vingers</b><span>Pannen; knijpen is zoomen</span></li>
+        <li><b>Veeg van de rand</b><span>Lade open en dicht</span></li>
+      </ul>
+      <div class="bps">
+        <div><span class="mono">≥ 1680 px</span><span>Sidebar 340 px, 3 cameo-kolommen, grotere radar</span></div>
+        <div><span class="mono">1180–1679</span><span>Sidebar 300 px, 2 kolommen</span></div>
+        <div><span class="mono">touch / &lt; 1180</span><span>Lade, 48 px-knoppen, modusschakelaar</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="shell">
+  <p class="eyebrow">Fase 18 <b>menu · lobby · score</b></p>
+  <h2>De schil eromheen</h2>
+  <p>Het hoofdmenu draait een echt AI-tegen-AI-potje op de achtergrond. De lobby toont spelers als rijen, met een mapvoorbeeld van de echte seed. Het eindscherm telt de scores op met tikgeluid. Het laadscherm wordt een briefing met de map, startposities en tips.</p>
+  <div class="shell">
+    <figure>
+      <div class="stage" data-w="1280" data-h="800"><div class="screen scr fx" data-faction="allies" data-follow>
+        <div class="bg"></div>
+        <div class="attract"><i></i>Live · AI vs AI · Twin Rivers</div>
+        <div class="menu-panel metal rivets">
+          <p class="logo">Iron <span>Front</span></p>
+          <div class="mbtn primary">Skirmish</div>
+          <div class="mbtn metal">Tutorial</div>
+          <div class="mbtn metal">Sandbox</div>
+          <div class="mbtn metal">Load game <small>3 saves</small></div>
+          <div class="mbtn metal">Options</div>
+          <div class="mbtn metal">Credits</div>
+        </div>
+        <div class="ver">v1.2.0 · MIT · open assets</div>
+      </div></div>
+      <figcaption><b>Main menu</b>Attract-mode op de achtergrond, een consolepaneel rechts.</figcaption>
+    </figure>
+    <figure>
+      <div class="stage" data-w="1280" data-h="800"><div class="screen scr fx" data-faction="allies" data-follow>
+        <div class="bg blur"></div>
+        <div class="lobby">
+          <div class="slots metal">
+            <h6>Skirmish</h6>
+            <div class="slot well"><svg width="34" height="34" style="color:var(--glow)"><use href="#em-allies"/></svg><span>Commander</span><span class="dd metal">Allied Coalition</span><span class="dd metal">Team 1</span><span class="sw" style="background:oklch(0.62 0.17 255)"></span></div>
+            <div class="slot well"><svg width="34" height="34" style="color:oklch(0.66 0.21 28)"><use href="#em-soviets"/></svg><span>General Kova</span><span class="dd metal">Red Bloc</span><span class="dd metal">Hard</span><span class="sw" style="background:oklch(0.6 0.2 28)"></span></div>
+            <div class="slot well"><svg width="34" height="34" style="color:oklch(0.7 0.18 310)"><use href="#em-psi"/></svg><span>Overseer Vale</span><span class="dd metal">Psi Directorate</span><span class="dd metal">Normal</span><span class="sw" style="background:oklch(0.58 0.2 305)"></span></div>
+            <div class="slot well" style="opacity:.55"><span></span><span>Open slot</span><span class="dd metal">Add AI</span><span></span><span></span></div>
+          </div>
+          <div class="mapcol metal">
+            <div class="well"><img src="img/minimap.png" alt=""></div>
+            <div class="opt">Map <b>Twin Rivers</b></div>
+            <div class="opt">Size <b>Medium</b></div>
+            <div class="opt">Credits <b>$5,000</b></div>
+            <div class="opt">Superweapons <b>On</b></div>
+            <div class="opt">Advanced <b>▸</b></div>
+            <div class="mbtn primary" style="margin-top:8px">Start battle</div>
+          </div>
+        </div>
+      </div></div>
+      <figcaption><b>Lobby</b>Slots per speler met factie, team en AI-niveau per slot; opties inklapbaar.</figcaption>
+    </figure>
+    <figure>
+      <div class="stage" data-w="1280" data-h="800"><div class="screen scr fx" data-faction="allies" data-follow>
+        <div class="bg blur"></div>
+        <div class="score metal rivets">
+          <div class="banner"><small>Twin Rivers · 23:41</small>Mission accomplished</div>
+          <div class="tally">
+            <div class="row"><span>Harvested</span><div class="bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b>$41,250</b></div>
+            <div class="row"><span>Units killed</span><div class="bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b>87</b></div>
+            <div class="row"><span>Units lost</span><div class="bar en"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b>34</b></div>
+            <div class="row"><span>Buildings razed</span><div class="bar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b>26</b></div>
+          </div>
+          <div class="rank"><svg viewBox="0 0 48 48"><path d="M8 14l16-9 16 9M8 24l16-9 16 9M8 34l16-9 16 9" fill="none" stroke="currentColor" stroke-width="4"/></svg>Rank: Field Marshal</div>
+        </div>
+      </div></div>
+      <figcaption><b>Score</b>Getallen tellen op, de balken lopen vol; daarna Replay of Main menu.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="fases">
+  <p class="eyebrow">Plan <b>plan/ux-plan.md</b></p>
+  <h2>Zes fases</h2>
+  <p>Na elke fase draait het spel en zijn tsc, vitest en e2e (drie browsers) groen. Dezelfde werkwijze als bij fases 7–13.</p>
+  <ol class="road">
+    <li><div class="n">14<small>Fundament</small></div><div><h3>Taal, tokens, fonts</h3><p>Alle UI in het Engels, factietokens in OKLCH, Barlow Condensed, Barlow en Share Tech Mono zelf gehost (OFL). De sidebar rendert maximaal 10× per seconde.</p></div><div class="done"><b>Klaar als</b>Er staat geen Nederlandse string meer in de UI (e2e) en de drie thema's wisselen via één attribuut.</div></li>
+    <li><div class="n">15<small>HUD</small></div><div><h3>Sidebar, cameo's, commandobalk, tablet</h3><p>Factie-chrome, credits-rol, radarluiken, stroomrail, clock-wipe, alle cameo-staten, superwapen-timers, commandobalk, lade en gebaren voor touch.</p></div><div class="done"><b>Klaar als</b>Elke cameo-staat staat in een screenshot per factie en de tablet-e2e (hasTouch) kan bouwen, plaatsen en aanvallen.</div></li>
+    <li><div class="n">16<small>Stem</small></div><div><h3>Announcer & juice</h3><p>±30 regels per factie via Piper met radiofilter, een spreekwachtrij met prioriteit en cooldown, ondertitels, unit-acks, minimap-pings, en spatie naar de laatste melding.</p></div><div class="done"><b>Klaar als</b>Elke regel hangt aan een event (unit-test), er klinken geen dubbele regels binnen de cooldown en alles staat in het register.</div></li>
+    <li><div class="n">17<small>Slagveld</small></div><div><h3>Leesbaarheid</h3><p>Hoekhaken en pips, orderlijnen, contextcursors, plaatsingsraster, stroomtekort-staat, rally-vlaggen, zachte kaartrand, kleurenblind-veilig.</p></div><div class="done"><b>Klaar als</b>Er zijn snapshot-tests per staat en de cursor-class wisselt in e2e op vijand, terrein en eigen gebouw.</div></li>
+    <li><div class="n">18<small>Schil</small></div><div><h3>Menu, lobby, briefing, score</h3><p>Attract-mode, een lobby met slots en mapvoorbeeld, eigen factie-emblemen, een briefing als laadscherm, en een eindscherm dat optelt.</p></div><div class="done"><b>Klaar als</b>Menu → lobby → briefing → game → score loopt in alle drie de browsers.</div></li>
+    <li><div class="n">19<small>Polish</small></div><div><h3>Toegankelijkheid & release</h3><p>Volumes per bus, UI-schaal, reduced motion, kleurenblind-palet, AA-contrast per thema, visuele regressietests, CHANGELOG 1.2.0.</p></div><div class="done"><b>Klaar als</b>De HUD kost gemiddeld minder dan 1 ms per frame, de screenshots per factie × device zijn groen en het register is compleet.</div></li>
+  </ol>
+  <div class="open decided">
+    <div><span><b>Eigen announcers.</b> AEGIS voor Allied, KOMMAND voor Red Bloc en CHOIR voor Psi, elk met een eigen stem en naam in de ondertitels.</span></div>
+    <div><span><b>Volledig Engels.</b> Ook heldnamen, taglines en tooltips: "De Orakel" wordt "The Oracle".</span></div>
+    <div><span><b>Unit-acks in fase 16.</b> Per factie en per klasse (infanterie, voertuig, schip, vliegtuig, held) drie select- en drie orderregels; helden krijgen eigen regels.</span></div>
+  </div>
+</section>
+
+<footer>Mockups gebruiken echte renders en de minimap uit de huidige build. Emblemen, iconen en cursors zijn voor dit voorstel getekend; er zijn geen beschermde ontwerpen nagebootst.</footer>
+</div>
+
+<script>
+(() => {
+  const F = {
+    allies: { name: 'Allied Coalition', emb: 'em-allies', tank: ['tank_allies', 'Warden Tank'],
+      cams: [['power','Power Plant',800],['refinery','Ore Refinery',2000],['barracks','Barracks',500],['factory','War Factory',2000],['radar','Radar Array',1000],['lab','Research Lab',2000],['prismtower','Refractor Tower',1500],['phasegate','Phase Gate',2500]],
+      info: ['Refractor Tower', 1500, '0:14', '−75', 'Light beam with long range and splash damage. Goes offline without power.'],
+      units: [['tank_allies','Warden Tank',700],['rifle','Rifleman',200],['nova','Nova',1500],['ifv','Lancer IFV',600]] },
+    soviets: { name: 'Red Bloc', emb: 'em-soviets', tank: ['tank_soviets', 'Anvil Heavy Tank'],
+      cams: [['power','Dynamo Plant',800],['refinery','Ore Refinery',2000],['barracks','Bloc Barracks',500],['factory','War Factory',2000],['radar','Radar Tower',1000],['lab','Research Institute',2000],['coil','Arc Coil',1500],['hammersilo','Hammer Silo',5000]],
+      info: ['Arc Coil', 1500, '0:14', '−75', 'Heavy electric discharge, destroys anything up close. An Arc Trooper next to it overcharges it.'],
+      units: [['tank_soviets','Anvil Heavy Tank',900],['rifle','Rifleman',200],['grom','Grom',1500],['heavy','Colossus Tank',1750]] },
+    psi: { name: 'Psi Directorate', emb: 'em-psi', tank: ['tank_psi', 'Lash Tank'],
+      cams: [['power','Bio Reactor',800],['refinery','Thrall Refinery',2000],['barracks','Psi Barracks',500],['factory','War Factory',2000],['radar','Psi Sensor Array',1000],['lab','Psi Laboratory',2000],['psispire','Psi Spire',1500],['dominion','Dominion Engine',5000]],
+      info: ['Psi Spire', 1500, '0:14', '−75', 'Psionic beam against vehicles. Goes offline without power.'],
+      units: [['tank_psi','Lash Tank',800],['initiate','Adept',200],['oracle','The Oracle',1500],['magnetar','Magnetar',1200]] },
+  };
+  // HUD cameo states, in grid order: idle, building, idle, on hold, idle, hover, ready, locked
+  const HUD_STATES = ['', 'b62', '', 'hold', '', 'hover', 'ready', 'locked'];
+  const zoom = (d) => /^(power|barracks|pillbox|tower|coil|psispire|prismtower|gatlingtower)$/.test(d) ? 2.1 : /^(rifle|initiate|nova|grom|oracle|rocket|arc|brute|mentalist)$/.test(d) ? 1.25 : 1.6;
+  const lock = '<svg class="lk"><use href="#i-lock"/></svg>';
+  const cameo = (f, [d, n, c], st, extra = '') => {
+    let cls = 'cameo', over = '';
+    if (st.startsWith('b')) { const p = +st.slice(1); over = `<div class="wipe" style="--p:${p * 3.6}deg"></div><span class="tm">0:${String(Math.round((100 - p) * 0.14)).padStart(2, '0')}</span>`; }
+    if (st === 'hold') { cls += ' hold'; over = '<div class="wipe" style="--p:140deg"></div><span class="plate">ON HOLD</span>'; }
+    if (st === 'ready') { cls += ' ready'; over = '<span class="plate">READY</span>'; }
+    if (st === 'locked') { cls += ' locked'; over = lock; }
+    if (st === 'poor') cls += ' poor';
+    if (st === 'hover') cls += ' hover';
+    if (st === 'press') cls += ' press';
+    return `<div class="${cls}" style="--z:${zoom(d)}"><img src="img/${f}.${d}.png" alt="">${over}${extra}<span class="pr">$${c.toLocaleString('en-US')}</span><span class="nm">${n}</span></div>`;
+  };
+
+  function paint(f) {
+    const d = F[f];
+    document.querySelectorAll('.switch button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.f === f)));
+    document.querySelectorAll('#hud-screen, #tab-screen, #states, [data-follow]').forEach((el) => el.dataset.faction = f);
+    const hud = document.getElementById('hud-screen');
+    hud.querySelector('[data-emblem] use').setAttribute('href', '#' + d.emb);
+    hud.querySelector('[data-fname]').textContent = d.name;
+    hud.querySelector('[data-cmd-img]').src = `img/${f}.${d.tank[0]}.png`;
+    hud.querySelector('[data-cmd-name]').textContent = d.tank[1];
+    hud.querySelector('[data-grid]').innerHTML = d.cams.map((c, i) => cameo(f, c, HUD_STATES[i])).join('');
+    const [n, cost, t, pw, desc] = d.info;
+    hud.querySelector('[data-info]').innerHTML = `<h5>${n}</h5><div class="kv"><span>$${cost.toLocaleString('en-US')}</span><span>${t}</span><span>⚡${pw}</span></div><p>${desc}</p><p class="req">Requires: Radar</p><p class="keys">Click: build · Right-click: hold / cancel</p>`;
+    document.querySelector('[data-tgrid]').innerHTML = d.cams.map((c, i) => cameo(f, c, ['', 'b62', 'ready', '', 'hold', '', 'poor', 'locked'][i])).join('');
+    const u = d.units, b = d.cams;
+    const S = [
+      [cameo(f, b[1], ''), 'Idle', 'Betaalbaar en beschikbaar. De prijs staat in mono, rechtsboven.'],
+      [cameo(f, b[3], 'hover'), 'Hover', 'Een dunne rand in de factiegloed; de tooltip toont prijs, tijd, stroom en vereisten.'],
+      [cameo(f, u[0], 'b40'), 'Building', 'Clock-wipe met wijzer en resterende tijd. Een klik zet er een extra in de wachtrij.'],
+      [cameo(f, u[1], 'b15', '<span class="q">3</span>'), 'Queued ×3', 'Het aantal staat linksboven. De tab krijgt een voortgangsring.'],
+      [cameo(f, b[6], 'hold'), 'On hold', 'Rechtsklik pauzeert. De wipe bevriest onder een gestreepte plaat; nog een rechtsklik annuleert.'],
+      [cameo(f, b[5], 'ready'), 'Ready', 'Een pulserende plaat en een rand; de stem zegt "Construction complete".'],
+      [cameo(f, u[3], 'poor'), 'Te duur', 'De prijs wordt rood en het beeld dooft half. Je kunt nog steeds in de wachtrij zetten: productie wacht op geld.'],
+      [cameo(f, b[7], 'locked'), 'Locked', 'Grijs met een slot. De tooltip noemt wat je nog nodig hebt.'],
+    ];
+    document.getElementById('states').innerHTML = S.map(([c, t, x]) => `<figure>${c}<figcaption><b>${t}</b>${x}</figcaption></figure>`).join('');
+  }
+  document.querySelectorAll('.switch button').forEach((b) => b.addEventListener('click', () => paint(b.dataset.f)));
+  paint('allies');
+
+  // Scale each fixed-size mockup to its column.
+  const fit = () => document.querySelectorAll('.stage').forEach((s) => {
+    const w = +s.dataset.w, h = +s.dataset.h, k = s.clientWidth / w;
+    s.style.height = h * k + 'px';
+    s.firstElementChild.style.setProperty('--k', k);
+  });
+  fit();
+  new ResizeObserver(fit).observe(document.body);
+})();
+</script>

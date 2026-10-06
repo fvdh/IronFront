@@ -1,0 +1,18 @@
+Weapon sound effects by Michel Baradari (apollo-music.de)
+Licence: CC-BY 3.0 — https://creativecommons.org/licenses/by/3.0/
+Attribution required: "Sounds (c) by Michel Baradari apollo-music.de"
+
+Sources (OpenGameArt, checked 2026-10-01):
+- "Chaingun, pistol, rifle, shotgun shots" — https://opengameart.org/content/chaingun-pistol-rifle-shotgun-shots
+    cg1.wav, pistol.wav, rifle.wav, shotgun.wav -> audio/sfx/gun-chaingun.wav, gun-pistol.wav, cannon-rifle.wav, cannon-shotgun.wav
+- "2 High Quality Explosions" — https://opengameart.org/content/2-high-quality-explosions
+    explode.wav, explodemini.wav -> audio/sfx/bigexplode-baradari.wav, explode-baradari.wav
+- "4 projectile launches" — https://opengameart.org/content/4-projectile-launches
+    rlaunch.wav -> audio/sfx/rocket-launch.wav
+
+Modifications: mixed to mono, resampled to 22.05 kHz, leading silence trimmed, shortened (0.45-1.3 s) with fade-out, peak-normalised.
+
+Original info.txt shipped with each pack:
+  Sounds (c) by Michel Baradari apollo-music.de
+  Licensed under CC BY 3.0 http://creativecommons.org/licenses/by/3.0/
+  Hosted on opengameart.org

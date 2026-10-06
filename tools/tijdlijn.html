@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Match Timeline</title>
+<!-- Fun Pass 20 (plan/fun-pass-plan.md): timeline of an "Export match data" file, for the fun audit in playtests.
+     Open this file in a browser and pick an export. Everything stays local. -->
+<style>
+  :root { --bg: #f4f2ee; --ink: #22252a; --muted: #6b6f76; --line: #d6d2ca; --p0: #2f7de1; --p1: #d8412f; --mark: #8a5a00; --phase: #ebe7df; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #17191c; --ink: #e6e4df; --muted: #9a9ea6; --line: #33373d; --phase: #202328; --mark: #e0b04a; } }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .meta { color: var(--muted); margin-bottom: 16px; }
+  label.pick { display: inline-block; padding: 8px 14px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+  input[type=file] { display: none; }
+  svg { width: 100%; height: auto; display: block; margin: 8px 0 20px; }
+  .axis { stroke: var(--line); }
+  text { fill: var(--muted); font-size: 11px; }
+  .legend span { margin-right: 16px; }
+  .sw { display: inline-block; width: 12px; height: 3px; vertical-align: middle; margin-right: 6px; }
+  table { border-collapse: collapse; margin-top: 8px; }
+  td, th { padding: 3px 12px 3px 0; text-align: left; }
+  th { color: var(--muted); font-weight: 500; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Match timeline</h1>
+  <div class="meta" id="meta">Choose an exported match (score screen → Export match data).</div>
+  <label class="pick">Open export… <input type="file" id="file" accept=".json,application/json"></label>
+  <div id="out"></div>
+</main>
+<script>
+const TICK = 30, MIN = 60 * TICK;
+const $ = (id) => document.getElementById(id);
+$('file').addEventListener('change', async (e) => { const f = e.target.files[0]; if (f) draw(JSON.parse(await f.text())); });
+
+function draw(rec) {
+  const tm = rec.telemetry, T = rec.tick, ps = rec.players.map((p) => p.id);
+  const name = (id) => { const p = rec.players.find((q) => q.id === id); return `${p.name} (${p.faction}${p.ai ? ', AI' : ''})`; };
+  $('meta').textContent = `Build ${rec.build} · AI ${rec.aiVersion} · ${rec.settings.mapPreset}, ${rec.settings.mapSize} · ${(T / MIN).toFixed(1)} min · ${rec.winner < 0 ? 'no winner' : 'winner: ' + name(rec.winner)}`;
+  const snaps = (p) => tm.snaps.filter((s) => s.p === p);
+  // income over the last minute, per snapshot
+  const inc = (p) => snaps(p).map((s, i, a) => ({ t: s.t, v: a.slice(Math.max(0, i - 5), i + 1).reduce((x, y) => x + y.income + y.stolen + y.bonus, 0) }));
+  const isP = (id) => ps.includes(id);
+  const contact = tm.ev.find((e) => (e.type === 'underAttack' || e.type === 'death') && isP(e.owner) && isP(e.by) && e.by !== e.owner);
+  const marks = [];
+  if (contact) marks.push({ t: contact.t, label: 'first contact' });
+  for (const p of ps) { const s = snaps(p).find((x) => x.cy >= 2); if (s) marks.push({ t: s.t, label: `2nd CY ${rec.players.find((q) => q.id === p).faction}` }); }
+  for (const e of tm.ev) if (e.type === 'superweapon' && e.phase === 'fired') marks.push({ t: e.t, label: `${e.def} fired` });
+  const big = biggestFight(tm.ev.filter((e) => e.type === 'death' && isP(e.owner) && isP(e.by) && e.by !== e.owner));
+  if (big) marks.push({ t: big.t, label: `biggest fight ($${big.v})` });
+  const C = contact ? contact.t : null;
+  const phases = [['opening', 0, Math.min(5 * MIN, T)], ['contact', C === null ? null : Math.max(0, C - MIN), C === null ? null : Math.min(T, C + 2 * MIN)],
+    ['midgame', 5 * MIN, Math.min(15 * MIN, T - 3 * MIN)], ['lategame', 15 * MIN, T >= 18 * MIN ? T - 3 * MIN : null], ['end', Math.max(0, T - 3 * MIN), T]]
+    .filter(([, a, b]) => a !== null && b !== null && b > a);
+  $('out').innerHTML = `<div class="legend">${ps.map((p, i) => `<span><i class="sw" style="background:var(--p${i})"></i>${name(p)}</span>`).join('')}</div>`
+    + chart('Army value ($)', ps.map((p) => snaps(p).map((s) => ({ t: s.t, v: s.army }))), T, marks, phases)
+    + chart('Income, last minute ($)', ps.map(inc), T, marks, phases)
+    + `<table><tr><th>Minute</th><th>Marker</th></tr>${marks.sort((a, b) => a.t - b.t).map((m) => `<tr><td>${(m.t / MIN).toFixed(1)}</td><td>${m.label}</td></tr>`).join('')}</table>`;
+}
+
+function biggestFight(ds) {
+  ds = [...ds].sort((a, b) => a.t - b.t);
+  const parent = ds.map((_, i) => i), find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+  for (let i = 0; i < ds.length; i++) for (let j = i + 1; j < ds.length && ds[j].t - ds[i].t <= 30 * TICK; j++)
+    if (Math.hypot(ds[i].x - ds[j].x, ds[i].y - ds[j].y) <= 8) parent[find(j)] = find(i);
+  const g = new Map();
+  ds.forEach((d, i) => { const r = find(i); const x = g.get(r) ?? { t: d.t, v: 0 }; x.v += d.cost ?? 0; g.set(r, x); });
+  return [...g.values()].sort((a, b) => b.v - a.v)[0];
+}
+
+function chart(title, series, T, marks, phases) {
+  const W = 1000, H = 260, L = 56, R = 10, top = 24, bot = 28;
+  const max = Math.max(1, ...series.flat().map((p) => p.v));
+  const x = (t) => L + (t / T) * (W - L - R), y = (v) => top + (1 - v / max) * (H - top - bot);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}"><text x="${L}" y="14">${title}</text>`;
+  phases.forEach(([n, a, b], i) => { if (i % 2 === 0) s += `<rect x="${x(a)}" y="${top}" width="${x(b) - x(a)}" height="${H - top - bot}" fill="var(--phase)"/>`; s += `<text x="${x(a) + 3}" y="${H - bot - 4}">${n}</text>`; });
+  s += `<line class="axis" x1="${L}" y1="${H - bot}" x2="${W - R}" y2="${H - bot}"/><line class="axis" x1="${L}" y1="${top}" x2="${L}" y2="${H - bot}"/>`;
+  for (let k = 0; k <= 4; k++) { const v = (max * k) / 4; s += `<text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${Math.round(v)}</text>`; }
+  for (let m = 0; m <= T / MIN; m += 5) s += `<text x="${x(m * MIN)}" y="${H - 8}" text-anchor="middle">${m}′</text>`;
+  for (const mk of marks) s += `<line x1="${x(mk.t)}" y1="${top}" x2="${x(mk.t)}" y2="${H - bot}" stroke="var(--mark)" stroke-dasharray="3 3"/>`;
+  series.forEach((pts, i) => { if (pts.length) s += `<polyline fill="none" stroke="var(--p${i})" stroke-width="2" points="${pts.map((p) => `${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ')}"/>`; });
+  return s + '</svg>';
+}
+</script>
+</body>
+</html>

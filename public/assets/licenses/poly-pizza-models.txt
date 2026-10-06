@@ -1,0 +1,34 @@
+3D models from poly.pizza (one note for the models that had no separate licence file)
+====================================================================================
+
+Licence of each model as recorded in docs/asset-register.md (source pages checked 2026-09-30).
+This file restates that record; it does not add licence information. Re-check the source
+page before every release.
+
+CC-BY 3.0 — attribution required — https://creativecommons.org/licenses/by/3.0/
+-------------------------------------------------------------------------------
+- models/tank-hover.glb      "Tank" by Zayn — https://poly.pizza/m/YWSyTmvGI2
+    Changes: scaled, rotated 180 degrees; for a second unit combined with Kenney Space Kit parts
+    and tinted purple; rendered to isometric 2D sprites.
+- models/truck-military.glb  "Military Truck - 2D/3D Collab" by Alex Safayan — https://poly.pizza/m/3XAD5t0Djqv
+    Changes: team colour on the canopy, a Kenney Space Kit rocket rack added for a second unit,
+    rendered to isometric 2D sprites.
+- models/rpg.glb             "RPG Launcher" by austincford — https://poly.pizza/m/2qqg9SbrsZ
+    Changes: scaled, attached to the hand of the infantry model, rendered to isometric 2D sprites.
+- models/jeep.glb            "Jeep" by Zsky — https://poly.pizza/m/AcSdGGrgYP
+    Changes: team colour applied, rendered to isometric 2D sprites.
+- models/tent.glb            "Military Tent" by KolosStudios — https://poly.pizza/m/vQANVbSE0v
+    Changes: scaled, rendered to an isometric 2D sprite.
+
+CC0 1.0 — no attribution required (credited anyway) — https://creativecommons.org/publicdomain/zero/1.0/
+-------------------------------------------------------------------------------------------------
+- models/tank-olive.glb      "Tank" by Quaternius — https://poly.pizza/m/cW3zvvkMOM
+- models/tank-heavy.glb      "Tank" by Quaternius — https://poly.pizza/m/uYHpj7lz1J
+- models/tank-brown.glb      "Tank" by Quaternius — https://poly.pizza/m/FA5daiyZQq
+    Changes (tanks): hull/turret split, team colour, rendered to isometric 2D sprites.
+- models/turret-cannon.glb   "Turret Cannon" by Quaternius — https://poly.pizza/m/mNJ6poH7Cp
+    Changes: top rotated separately, rendered to isometric 2D sprites.
+
+Other poly.pizza models have their own file: quaternius-soldier-animated.txt, quaternius-rifle.txt,
+quaternius-dog.txt, poly-by-google-blimp.txt,
+poly-pizza-phase9-models.txt (heli-gunship, jet-strike, brain, spider, lifeboat).

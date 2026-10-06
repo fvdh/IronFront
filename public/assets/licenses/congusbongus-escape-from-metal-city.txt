@@ -1,0 +1,5 @@
+"Escape from Metal City" by congusbongus — https://opengameart.org/content/escape-from-metal-city
+Licence: CC0 1.0 (public domain dedication) — https://creativecommons.org/publicdomain/zero/1.0/
+Checked on OpenGameArt 2026-10-01. No attribution required; credited anyway.
+File: escape_from_metal_city.ogg -> audio/music/escape-from-metal-city.m4a
+Modifications: transcoded from Ogg Vorbis to AAC (m4a, 96 kbit/s). No musical changes.

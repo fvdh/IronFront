@@ -1,0 +1,13 @@
+bridge/Concrete034.jpg
+======================
+
+Source:   ambientCG — "Concrete 034" (1K JPG colour map), https://ambientcg.com/view?id=Concrete034
+Author:   Lennart Demes / ambientCG
+License:  CC0 1.0 Universal (public domain dedication) — https://docs.ambientcg.com/license/
+          https://creativecommons.org/publicdomain/zero/1.0/
+Attribution: not required (credited voluntarily).
+Edits:    colour map only, downscaled from 1024 px to 256 px (JPEG q80). Used as the concrete
+          texture of the procedurally built bridges (src/game/render/bridge.ts).
+
+The bridge deck also reuses textures/Asphalt031.jpg (ambientCG, CC0; already listed in CREDITS.txt).
+All bridge geometry is procedural (no third-party models).

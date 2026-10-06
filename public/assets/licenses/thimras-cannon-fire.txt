@@ -1,0 +1,5 @@
+"Cannon fire" by Thimras — https://opengameart.org/content/cannon-fire
+Licence: CC0 1.0 (public domain dedication) — https://creativecommons.org/publicdomain/zero/1.0/
+Checked on OpenGameArt 2026-10-01. No attribution required; credited anyway.
+File: cannon_fire_0.ogg -> audio/sfx/cannon-fire.wav
+Modifications: mono, 22.05 kHz, trimmed to 0.8 s with fade-out, peak-normalised.

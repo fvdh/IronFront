@@ -1,0 +1,51 @@
+{
+  "_comment": "Spoken lines. Announcer lines are keyed by the exact message text the game says (the file name is its slug). Generated offline by tools/gen-voices.py; see docs/asset-register.md.",
+  "announcers": {
+    "allies": { "name": "AEGIS", "voice": "en_GB-cori-high", "fx": "aegis" },
+    "soviets": { "name": "KOMMAND", "voice": "en_US-norman-medium", "fx": "kommand" },
+    "psi": { "name": "CHOIR", "voice": "en_US-ljspeech-high", "fx": "choir" }
+  },
+  "announcer": [
+    "Battle control online", "Building", "Training", "Construction complete", "Unit ready", "On hold", "Cancelled",
+    "Insufficient funds", "Low power", "Power restored", "Radar online", "Radar offline", "New construction options",
+    "Cannot deploy here", "Queue full", "Unit limit reached", "Select target", "Rally point set", "Repairing", "Structure sold",
+    "Our base is under attack", "Our harvester is under attack", "Unit lost", "Structure lost", "Unit promoted",
+    "Building captured", "Structure captured by the enemy", "Enemy infiltration detected", "Building garrisoned",
+    "Unit under enemy mind control", "Warning: mind control beam", "Bridge destroyed", "Bridge repaired", "Mission accomplished", "Mission failed",
+    "@superweapons"
+  ],
+  "flavour": {
+    "soviets": { "Battle control online": "Command link established", "Building": "Now building" },
+    "psi": { "Battle control online": "The Directorate is listening", "Construction complete": "Construction is complete" }
+  },
+  "superweapons": ["Phase Gate", "Storm Engine", "Hammer Silo", "Stasis Projector", "Dominion Engine", "Mutagen Spire"],
+  "superweaponLines": ["{0} online", "{0} ready", "{0} activated", "Warning: enemy {0} detected", "Warning: enemy {0} ready", "Warning: enemy {0} activated"],
+  "acks": {
+    "allies": {
+      "voice": "en_US-john-medium",
+      "infantry": { "select": ["Ready for orders", "Standing by", "Go ahead"], "move": ["Moving out", "On my way", "Copy that"], "attack": ["Engaging", "Weapons free"] },
+      "vehicle": { "select": ["Crew ready", "Armor standing by", "Tank here"], "move": ["Rolling out", "Tracks moving", "Heading over"], "attack": ["Target locked", "Firing"] },
+      "ship": { "select": ["Bridge here", "Ship ready", "Awaiting heading"], "move": ["Setting course", "Full ahead", "Underway"], "attack": ["Guns hot", "Engaging target"] },
+      "aircraft": { "select": ["Pilot ready", "Flight standing by", "In the air"], "move": ["Vectoring", "Wheels up", "On approach"], "attack": ["Attack run", "Missiles away"] }
+    },
+    "soviets": {
+      "voice": "en_US-norman-medium",
+      "infantry": { "select": ["For the Bloc", "Awaiting orders", "What now"], "move": ["We march now", "We go", "Moving forward"], "attack": ["Crush them", "Open fire"] },
+      "vehicle": { "select": ["Engine running", "The armor is ready", "Steel waits"], "move": ["Advancing", "Rolling forward", "Make way"], "attack": ["Main gun ready", "Flatten it"] },
+      "ship": { "select": ["Hull ready", "Fleet waiting", "On deck"], "move": ["Course set", "Full steam", "Sailing"], "attack": ["Sink them", "Torpedo ready"] },
+      "aircraft": { "select": ["The sky is ours", "We are airborne", "Ready in the sky"], "move": ["Flying there", "Turning now", "Heading out"], "attack": ["Bombs ready", "Strike now"] }
+    },
+    "psi": {
+      "voice": "en_US-kristin-medium",
+      "infantry": { "select": ["We are listening", "Your will", "Speak"], "move": ["We follow", "As you wish", "Going"], "attack": ["Break their minds", "Strike"] },
+      "vehicle": { "select": ["The machine obeys", "Systems awake", "Ready"], "move": ["Gliding", "Advancing", "Moving silently"], "attack": ["Unleash it", "Target found"] },
+      "ship": { "select": ["Below the waves", "We wait", "Submerged"], "move": ["Drifting", "Diving", "Following the current"], "attack": ["Surface and strike", "Release"] },
+      "aircraft": { "select": ["We hover", "Above you", "Aloft"], "move": ["Floating there", "We glide", "Drifting on"], "attack": ["Descend", "Burn them"] }
+    }
+  },
+  "heroes": {
+    "nova": { "voice": "en_US-kristin-medium", "fx": "hero", "select": ["Nova here", "Let's make it quick", "Point me at it"], "move": ["On it", "Moving fast", "Got it"], "attack": ["Taking them down", "They won't see me"] },
+    "grom": { "voice": "en_US-norman-medium", "fx": "grom", "select": ["Grom is here", "Who needs smashing", "Speak, little man"], "move": ["Grom goes", "Out of my way", "Grom is walking"], "attack": ["Grom smash", "This is too easy"] },
+    "oracle": { "voice": "en_US-ljspeech-high", "fx": "oracle", "select": ["I have foreseen this", "The paths are open", "Ask"], "move": ["As it was written", "I am already there", "The way is clear"], "attack": ["Their end is near", "I saw this coming"] }
+  }
+}

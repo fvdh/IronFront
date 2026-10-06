@@ -1,0 +1,9 @@
+"Rifle" by Quaternius
+Source: https://poly.pizza/m/cCAgiMOQow  (file: https://static.poly.pizza/55ae5e9a-5e18-41b7-a352-dbcfc3c60854.glb)
+Author page: https://poly.pizza/u/Quaternius  (https://quaternius.com/)
+License (as stated on the source page, checked 2026-10-01): CC0 1.0 Universal (Public Domain Dedication)
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Used as: models/rifle.glb (held by unit.infantry and, recoloured, unit.arc).
+Modifications: re-saved with gltf-transform (prune/dedup), scaled, attached to the soldier's hand bone, rendered to isometric 2D sprites.
+No attribution required; credited anyway.

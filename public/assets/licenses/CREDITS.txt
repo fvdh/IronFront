@@ -1,0 +1,91 @@
+Iron Front — third-party asset attribution
+==========================================
+
+CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/) — attribution required.
+Modifications: every model is rendered (at load time) to isometric 2D sprites; further changes are listed per model.
+
+- models/tank-hover.glb      "Tank" by Zayn — https://poly.pizza/m/YWSyTmvGI2 — CC-BY 3.0 — poly-pizza-models.txt
+                             Changes: scaled, rotated 180 degrees; also combined with Kenney Space Kit parts and tinted purple.
+- models/truck-military.glb  "Military Truck - 2D/3D Collab" by Alex Safayan — https://poly.pizza/m/3XAD5t0Djqv — CC-BY 3.0 — poly-pizza-models.txt
+                             Changes: team colour on the canopy; also fitted with a Kenney Space Kit rocket rack.
+- models/trooper.glb         "Soldier" (animated) by Quaternius — https://poly.pizza/m/oAArCNHjFB — CC-BY 3.0 — quaternius-soldier-animated.txt
+                             Changes: unused animation clips removed, clips resampled, recoloured per unit type;
+                             walk/fire/melee/death animations baked to sprite frames (all infantry); props (jetpack, hats,
+                             backpacks, weapons, crystals) attached to bones for the specialist and hero infantry.
+- models/rpg.glb             "RPG Launcher" by austincford — https://poly.pizza/m/2qqg9SbrsZ — CC-BY 3.0 — poly-pizza-models.txt
+                             Changes: scaled, attached to the infantry model's hand.
+- models/jeep.glb            "Jeep" by Zsky — https://poly.pizza/m/AcSdGGrgYP — CC-BY 3.0 — poly-pizza-models.txt
+                             Changes: team colour.
+- models/tent.glb            "Military Tent" by KolosStudios — https://poly.pizza/m/vQANVbSE0v — CC-BY 3.0 — poly-pizza-models.txt
+                             Changes: scaled; for the Field Hospital drawn untextured in plain white.
+- models/air-blimp.glb       "Blimp" by Poly by Google — https://poly.pizza/m/45-KKnBcxvE — CC-BY 3.0 — poly-by-google-blimp.txt
+                             Changes: scaled, texture accents recoloured to team/faction colours.
+- models/heli-gunship.glb    "Helicopter" by Zsky — https://poly.pizza/m/hG2Qr0A3zR — CC-BY 3.0 — poly-pizza-phase9-models.txt
+                             Changes: scaled, recoloured, team colour on accents, cannon barrel added underneath.
+- models/jet-strike.glb      "Jet" by jeremy — https://poly.pizza/m/6fyLMORhgGK — CC-BY 3.0 — poly-pizza-phase9-models.txt
+                             Changes: scaled, recoloured dark grey, team-coloured dorsal stripe added.
+- models/brain.glb           "Brain" by J-Toastie — https://poly.pizza/m/YihDCHsOPO — CC-BY 3.0 — poly-pizza-phase9-models.txt
+                             Changes: scaled, recoloured (lilac brain dome; yellow-green gas cloud), combined with Kenney Space Kit craft.
+- models/oil-pump.glb        "Oil pump" by Poly by Google — https://poly.pizza/m/fZykGFywa5D — CC-BY 3.0 — poly-pizza-phase10-models.txt
+                             Changes: scaled, placed on a concrete pad with a Kenney storage tank and barrels (Fuel Rig).
+
+CC0 1.0 (public domain) — no attribution required, credited anyway.
+
+- models/tank-olive.glb, tank-heavy.glb, tank-brown.glb  "Tank" by Quaternius — https://poly.pizza/m/cW3zvvkMOM, /uYHpj7lz1J, /FA5daiyZQq — poly-pizza-models.txt
+- models/turret-cannon.glb   "Turret Cannon" by Quaternius — https://poly.pizza/m/mNJ6poH7Cp — poly-pizza-models.txt
+- models/dog.glb             "Dog" by Quaternius — https://poly.pizza/m/2kUk0QqpCg — quaternius-dog.txt
+- models/rifle.glb           "Rifle" by Quaternius — https://poly.pizza/m/cCAgiMOQow — quaternius-rifle.txt
+- models/spider.glb          "Spider" by Quaternius — https://poly.pizza/m/yRYJiAJyiM — poly-pizza-phase9-models.txt
+- models/lifeboat.glb        "Lifeboat" by Quaternius — https://poly.pizza/m/Bkd4KKQA4O — poly-pizza-phase9-models.txt
+- models/civ-church.glb      "Church" by CreativeTrio — https://poly.pizza/m/GHzPfvoyzX — poly-pizza-phase10-models.txt
+- models/civ-barn.glb        "Barn" by Quaternius — https://poly.pizza/m/vSqQNA7ez6 — poly-pizza-phase10-models.txt
+- models/civ-shed.glb        "Storage Shed" by Quaternius — https://poly.pizza/m/JrFL3mLOKg — poly-pizza-phase10-models.txt
+- models/crate.glb           "Crate" by Quaternius — https://poly.pizza/m/3VGWnZPXmG — poly-pizza-phase10-models.txt
+- models/sub-*.glb, models/Textures/sub-colormap.png     Kenney City Kit (Suburban) 2.0 — https://kenney.nl/assets/city-kit-suburban — kenney-city-kit-suburban.txt (texture path renamed)
+- models/com-*.glb, models/Textures/com-colormap.png     Kenney City Kit (Commercial) 2.1 — https://kenney.nl/assets/city-kit-commercial — kenney-city-kit-commercial.txt (texture path renamed)
+- models/car-*.glb, models/Textures/car-colormap.png     Kenney Car Kit 3.1 — https://kenney.nl/assets/car-kit — kenney-car-kit.txt (texture path renamed)
+- models/ind-*.glb, models/Textures/colormap.png         Kenney City Kit (Industrial) — kenney-city-kit-industrial.txt (incl. shipping-container-a on the base crawler; building-j for the Machine Shop)
+- models/space-*.glb         Kenney Space Kit — kenney-space-kit.txt (incl. turrets, rover, speeder, crystals, hangars, supports, chimney for the faction expansion; craft_speederD, hangar_roundB, platform_large, structure_detailed, supports_low for phase 4;
+                             platform_small, machine_wireless, rocket_fuelA, rocket_topA, barrel for walls, airfield, anti-air, base crawler and infantry props;
+                             craft_miner, craft_cargoB, craft_speederB, gate_simple for the phase-9 Psi vehicles and hovercraft)
+- models/td-*.glb, models/Textures/td-colormap.png       Kenney Tower Defense Kit — kenney-tower-defense-kit.txt (texture path renamed; tile used untextured as plain blocks for walls/aprons; wood-structure-high as the Outpost watch tower)
+- models/nat-*.glb           Kenney Nature Kit — kenney-nature-kit.txt
+- fx/fx.png                  Kenney Smoke Particles (downscaled into one atlas) — kenney-smoke-particles.txt
+- textures/*.jpg             ambientCG Grass004, Ground054, Rock051, Asphalt031 (1K, downscaled to 512 px) — https://ambientcg.com — ambientcg-terrain-textures.txt
+- bridge/Concrete034.jpg     ambientCG Concrete034 (colour map, downscaled to 256 px) — ambientcg-concrete034.txt
+
+Audio
+-----
+
+CC-BY 3.0 / 4.0 — attribution required.
+
+- audio/music/act-of-war.m4a       "Act of War" by Alexandr Zhelanov (https://soundcloud.com/alexandr-zhelanov) — https://opengameart.org/content/act-of-war — CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/) — changes: transcoded to AAC — zhelanov-music.txt
+- audio/music/iron-wasteland.m4a   "Iron wasteland" by Alexandr Zhelanov (https://soundcloud.com/alexandr-zhelanov) — https://opengameart.org/content/iron-wasteland — CC-BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — changes: transcoded to AAC — zhelanov-music.txt
+- audio/sfx/gun-chaingun.wav, gun-pistol.wav, cannon-rifle.wav, cannon-shotgun.wav, explode-baradari.wav, bigexplode-baradari.wav, rocket-launch.wav
+                                   Sounds (c) by Michel Baradari apollo-music.de
+                                   "Chaingun, pistol, rifle, shotgun shots" — https://opengameart.org/content/chaingun-pistol-rifle-shotgun-shots
+                                   "2 High Quality Explosions" — https://opengameart.org/content/2-high-quality-explosions
+                                   "4 projectile launches" — https://opengameart.org/content/4-projectile-launches
+                                   CC-BY 3.0 (https://creativecommons.org/licenses/by/3.0/)
+                                   Changes: mono, 22.05 kHz, trimmed, faded out, normalised — baradari-weapon-sfx.txt
+
+CC0 1.0 (public domain) — no attribution required, credited anyway.
+
+- audio/music/escape-from-metal-city.m4a  "Escape from Metal City" by congusbongus — https://opengameart.org/content/escape-from-metal-city — transcoded to AAC — congusbongus-escape-from-metal-city.txt
+- audio/sfx/cannon-fire.wav        "Cannon fire" by Thimras — https://opengameart.org/content/cannon-fire — trimmed — thimras-cannon-fire.txt
+- audio/sfx/gun-shot.ogg, explode-3.ogg   "100 CC0 SFX" by rubberduck — https://opengameart.org/content/100-cc0-sfx — rubberduck-100-cc0-sfx.txt
+- audio/sfx/ui-*.ogg               Kenney Interface Sounds — https://kenney.nl/assets/interface-sounds — kenney-interface-sounds.txt
+- audio/sfx/zap-*.ogg, explode-1/2.ogg, bigexplode-lowfreq.ogg, capture.ogg, mindcontrol.ogg
+                                   Kenney Sci-fi Sounds — https://kenney.nl/assets/sci-fi-sounds — kenney-sci-fi-sounds.txt
+- audio/voice/**/*.m4a             Announcer and unit voices: own lines, generated with Piper TTS (https://github.com/OHF-Voice/piper1-gpl)
+                                   using voice models from https://huggingface.co/rhasspy/piper-voices (MIT) trained on public-domain
+                                   recordings: cori, kristin, norman, john (LibriVox, voices by Bryce Beattie) and ljspeech (LJ Speech
+                                   Dataset, Keith Ito). Radio and echo effects added — piper-voices.txt
+- audio/sfx/place-*.ogg            Kenney Impact Sounds — https://kenney.nl/assets/impact-sounds — kenney-impact-sounds.txt
+- audio/sfx/victory.ogg, defeat.ogg  Kenney Music Jingles (jingles_HIT15, jingles_HIT04) — https://kenney.nl/assets/music-jingles — kenney-music-jingles.txt
+
+Fonts
+-----
+SIL Open Font License 1.1 (https://openfontlicense.org), bundled via Fontsource.
+- Barlow, Barlow Condensed   The Barlow Project Authors, https://github.com/jpt/barlow — font-barlow-OFL.txt, font-barlow-condensed-OFL.txt
+- Share Tech Mono             Carrois Type Design, Ralph du Carrois — font-share-tech-mono-OFL.txt

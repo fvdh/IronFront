@@ -1,0 +1,8 @@
+"Dog" by Quaternius
+Source: https://poly.pizza/m/2kUk0QqpCg  (file: https://static.poly.pizza/de55d76a-f578-4979-97ff-2a62edac32f3.glb)
+Author page: https://poly.pizza/u/Quaternius
+License (as stated on the source page, checked 2026-10-01): CC0 1.0 Universal (Public Domain Dedication)
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Used as: models/dog.glb (unit.dog). Modifications: scaled, rendered to isometric 2D sprites.
+No attribution required; credited anyway.

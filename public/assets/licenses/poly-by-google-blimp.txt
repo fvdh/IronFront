@@ -1,0 +1,8 @@
+"Blimp" by Poly by Google
+Source: https://poly.pizza/m/45-KKnBcxvE  (file: https://static.poly.pizza/243486f9-4ae5-4241-868c-a559a57ad4ef.glb)
+Author page: https://poly.pizza/u/Poly%20by%20Google
+License (as stated on the source page, checked 2026-10-01): Creative Commons Attribution 3.0 (CC-BY 3.0)
+https://creativecommons.org/licenses/by/3.0/
+
+Used as: models/air-blimp.glb (unit.airship). Modifications: scaled, texture accents recoloured
+to team/faction colours at load time, rendered to isometric 2D sprites. Attribution required.

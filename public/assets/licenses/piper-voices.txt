@@ -1,0 +1,18 @@
+Iron Front — announcer and unit voices (public/assets/audio/voice/)
+
+The lines are original text (src/game/data/voicelines.json), synthesised offline with Piper TTS and then processed
+(radio band-pass, saturation, squelch, pitch, echo) by tools/gen-voices.py. No recordings of real people are shipped
+and no voice was cloned. Checked 2026-10-02 against the model cards in the piper-voices repository.
+
+Voice models: https://huggingface.co/rhasspy/piper-voices — repository license: MIT.
+
+  en_GB-cori-high       dataset: LibriVox recordings, public domain. "Trained from scratch" (Bryce Beattie, https://brycebeattie.com/files/tts/)
+  en_US-kristin-medium  dataset: LibriVox recordings, public domain. "Trained from scratch" (Bryce Beattie)
+  en_US-norman-medium   dataset: LibriVox recordings, public domain. "Trained from scratch" (Bryce Beattie)
+  en_US-john-medium     dataset: LibriVox recordings, public domain. Fine-tuned from kristin (Bryce Beattie)
+  en_US-ljspeech-high   dataset: LJ Speech Dataset (Keith Ito, https://keithito.com/LJ-Speech-Dataset/), public domain. "Trained from scratch"
+
+Not used on purpose: en_US-libritts_r and other models fine-tuned from the "lessac" voice (Blizzard Challenge 2013
+data under a restrictive license), and models whose data is CC BY-NC / BY-NC-SA.
+
+Piper itself (GPL-3.0) is only a generation tool; it is not part of the game.

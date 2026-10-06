@@ -1,0 +1,12 @@
+"Soldier" (animated) by Quaternius
+Source: https://poly.pizza/m/oAArCNHjFB  (file: https://static.poly.pizza/66a55d04-4286-44a3-b289-0d774c27db5b.glb)
+Author page: https://poly.pizza/u/Quaternius  (https://quaternius.com/)
+License (as stated on the source page, checked 2026-10-01): Creative Commons Attribution 3.0 (CC-BY 3.0)
+https://creativecommons.org/licenses/by/3.0/
+
+Attribution: "Soldier" by Quaternius (poly.pizza/m/oAArCNHjFB), CC-BY 3.0.
+
+Used as: models/trooper.glb (all infantry except the dog).
+Modifications: unused animation clips removed and remaining clips resampled (gltf-transform), clip names shortened;
+materials recoloured per unit type / team colour; posed (Idle, Idle_Gun, Run, Run_Shoot, Idle_Gun_Shoot,
+Punch_Right, Death) and rendered to isometric 2D sprite frames.

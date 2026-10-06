@@ -1,0 +1,12 @@
+Music by Alexandr Zhelanov — https://soundcloud.com/alexandr-zhelanov
+Attribution notice requested on OpenGameArt: "Alexandr Zhelanov, https://soundcloud.com/alexandr-zhelanov"
+
+- "Act of War" — https://opengameart.org/content/act-of-war
+    Licence: CC-BY 3.0 — https://creativecommons.org/licenses/by/3.0/
+    -> audio/music/act-of-war.m4a
+- "Iron wasteland" — https://opengameart.org/content/iron-wasteland
+    Licence: CC-BY 4.0 — https://creativecommons.org/licenses/by/4.0/
+    -> audio/music/iron-wasteland.m4a
+
+Checked on OpenGameArt 2026-10-01.
+Modifications: transcoded from Ogg Vorbis to AAC (m4a, 96 kbit/s) to reduce download size. No musical changes.

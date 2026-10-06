@@ -1,0 +1,32 @@
+3D models from poly.pizza added for the phase-10 map structures (town, tech buildings, supply crate)
+==================================================================================================
+
+Licence of each model as stated on its poly.pizza source page ("Licence" field), checked 2026-10-01.
+This file restates that record; it does not add licence information. Re-check the source page
+before every release. All models are rendered (at load time) to isometric 2D sprites.
+
+CC-BY 3.0 — attribution required — https://creativecommons.org/licenses/by/3.0/
+-------------------------------------------------------------------------------
+- models/oil-pump.glb      "Oil pump" by Poly by Google — https://poly.pizza/m/fZykGFywa5D
+    (file: https://static.poly.pizza/0aba8980-025d-4921-a804-063d7b33d493.glb)
+    Author page: https://poly.pizza/u/Poly%20by%20Google
+    Used as: building.techrig (Fuel Rig). Changes: scaled, placed on a concrete pad next to a Kenney
+    City Kit (Industrial) storage tank and Kenney Space Kit barrels.
+
+CC0 1.0 — no attribution required (credited anyway) — https://creativecommons.org/publicdomain/zero/1.0/
+-------------------------------------------------------------------------------------------------
+- models/civ-church.glb    "Church" by CreativeTrio — https://poly.pizza/m/GHzPfvoyzX
+    (file: https://static.poly.pizza/bcc08510-16ab-4f07-bf0b-bde4c9695dd2.glb)
+    Used as: building.civhall (Town Hall). Changes: scaled, walls tinted towards a dusty off-white,
+    two Kenney City Kit (Suburban) trees added.
+- models/civ-barn.glb      "Barn" by Quaternius — https://poly.pizza/m/vSqQNA7ez6
+    (file: https://static.poly.pizza/e0ecaf1c-bff4-4f30-9a53-0cf0c1c90deb.glb)
+    Used as: building.civfarm (Farmhouse). Changes: scaled, recoloured (faded red, grey roof),
+    a silo (Kenney Space Kit cylinder + cap) added.
+- models/civ-shed.glb      "Storage Shed" by Quaternius — https://poly.pizza/m/JrFL3mLOKg
+    (file: https://static.poly.pizza/5f6fd867-1979-4bd1-a2f9-99627cf86ac3.glb)
+    Used as: building.bridgehut (Bridge Repair Hut). Changes: scaled, orange marker post added.
+- models/crate.glb         "Crate" by Quaternius — https://poly.pizza/m/3VGWnZPXmG
+    (file: https://static.poly.pizza/720097e2-63ed-4e5f-9b66-eb416942eea0.glb)
+    Used as: prop.crate (bonus supply crate). Changes: scaled, wood recoloured lighter, yellow "+"
+    marking (Kenney Tower Defense Kit tile, untextured) added on the lid.
